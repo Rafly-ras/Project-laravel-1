@@ -14,30 +14,27 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Find the Admin role (assumes RolePermissionSeeder has run)
+        $adminEmail = env('DEFAULT_ADMIN_EMAIL', 'admin@example.com');
+        $adminPassword = env('DEFAULT_ADMIN_PASSWORD', 'admin123');
+
+        // Get Admin role
         $adminRole = Role::where('name', 'Admin')->first();
 
-        if (!$adminRole) {
-            // Fallback if role doesn't exist for some reason
-            $adminRole = Role::create(['name' => 'Admin']);
-        }
-
-        $adminEmail = 'admin@example.com';
-        
+        // Check if admin user already exists
         $user = User::where('email', $adminEmail)->first();
 
-        if (!$user) {
+        if (!$user && $adminRole) {
             User::create([
                 'name' => 'Admin',
                 'email' => $adminEmail,
-                'password' => Hash::make('admin123'),
-                'role_id' => $adminRole->id
+                'password' => Hash::make($adminPassword),
+                'role_id' => $adminRole->id,
             ]);
-        } else {
-            // Update password if user already exists (to match user request)
+        } elseif ($user && $adminRole) {
+            // Update role and password if it exists (ensures seeder works as intended)
             $user->update([
-                'password' => Hash::make('admin123'),
-                'role_id' => $adminRole->id
+                'password' => Hash::make($adminPassword),
+                'role_id' => $adminRole->id,
             ]);
         }
     }
