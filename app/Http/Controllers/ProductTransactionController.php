@@ -82,29 +82,52 @@ class ProductTransactionController extends Controller
     {
         $selectedProductId = $product ? $product->id : $request->query('product_id');
         $products = Product::orderBy('name')->get();
-        return view('transactions.create', compact('products', 'selectedProductId'));
+        $warehouses = \App\Models\Warehouse::where('is_active', true)->get();
+        return view('transactions.create', compact('products', 'selectedProductId', 'warehouses'));
     }
 
     public function store(ProductTransactionRequest $request)
     {
         $validated = $request->validated();
         $product = Product::findOrFail($validated['product_id']);
+        $warehouse = \App\Models\Warehouse::findOrFail($validated['warehouse_id']);
 
-        // Check stock for 'Keluar' (Out) transactions
-        if ($validated['type'] === 'Keluar' && $product->stock < $validated['quantity']) {
-            return back()->withInput()->with('error', "Insufficient stock. Current stock is {$product->stock}.");
+        // Check stock in specific warehouse for 'Keluar' transactions
+        $warehouseStock = $product->warehouses()->where('warehouse_id', $warehouse->id)->first()?->pivot->stock ?? 0;
+
+        if ($validated['type'] === 'Keluar' && $warehouseStock < $validated['quantity']) {
+            return back()->withInput()->with('error', "Insufficient stock in {$warehouse->name}. Current stock: {$warehouseStock}.");
         }
 
         try {
-            DB::transaction(function () use ($validated, $product) {
+            DB::transaction(function () use ($validated, $product, $warehouse) {
                 // Create transaction
                 ProductTransaction::create($validated);
 
-                // Update product stock
+                // Update product-warehouse pivot stock
+                $currentPivotStock = $product->warehouses()->where('warehouse_id', $warehouse->id)->first()?->pivot->stock ?? 0;
+                $newPivotStock = ($validated['type'] === 'Masuk') 
+                    ? $currentPivotStock + $validated['quantity'] 
+                    : $currentPivotStock - $validated['quantity'];
+
+                $product->warehouses()->syncWithoutDetaching([
+                    $warehouse->id => ['stock' => $newPivotStock]
+                ]);
+
+                // Update product total stock cache
                 if ($validated['type'] === 'Masuk') {
                     $product->increment('stock', $validated['quantity']);
                 } else {
                     $product->decrement('stock', $validated['quantity']);
+                }
+
+                // Check for low stock and notify
+                if ($product->fresh()->stock <= 5) {
+                    $admins = \App\Models\User::whereHas('role', function($q) {
+                        $q->where('name', 'Admin');
+                    })->get();
+                    
+                    \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\LowStockNotification($product, $warehouse));
                 }
             });
 
@@ -112,7 +135,7 @@ class ProductTransactionController extends Controller
                 ->with('success', 'Transaction recorded successfully.');
         } catch (\Exception $e) {
             return back()->withInput()
-                ->with('error', 'Failed to record transaction. Please try again.');
+                ->with('error', 'Failed to record transaction: ' . $e->getMessage());
         }
     }
 }

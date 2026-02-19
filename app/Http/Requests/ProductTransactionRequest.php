@@ -18,6 +18,7 @@ class ProductTransactionRequest extends FormRequest
     {
         return [
             'product_id' => 'required|exists:products,id',
+            'warehouse_id' => 'required|exists:warehouses,id',
             'type' => 'required|in:Masuk,Keluar',
             'quantity' => 'required|integer|min:1',
             'description' => 'nullable|string',
