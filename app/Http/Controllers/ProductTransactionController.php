@@ -56,19 +56,33 @@ class ProductTransactionController extends Controller
         return $pdf->download('transactions_' . now()->format('YmdHis') . '.pdf');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $transactions = ProductTransaction::with('product')
+            ->when($request->product_id, function ($query, $productId) {
+                return $query->where('product_id', $productId);
+            })
+            ->when($request->type, function ($query, $type) {
+                return $query->where('type', $type);
+            })
+            ->when($request->start_date, function ($query, $startDate) {
+                return $query->whereDate('created_at', '>=', $startDate);
+            })
+            ->when($request->end_date, function ($query, $endDate) {
+                return $query->whereDate('created_at', '<=', $endDate);
+            })
             ->latest()
-            ->paginate(15);
+            ->paginate(10);
         
-        return view('transactions.index', compact('transactions'));
+        $products = Product::orderBy('name')->get();
+        return view('transactions.index', compact('transactions', 'products'));
     }
 
-    public function create()
+    public function create(Request $request, Product $product = null)
     {
+        $selectedProductId = $product ? $product->id : $request->query('product_id');
         $products = Product::orderBy('name')->get();
-        return view('transactions.create', compact('products'));
+        return view('transactions.create', compact('products', 'selectedProductId'));
     }
 
     public function store(ProductTransactionRequest $request)

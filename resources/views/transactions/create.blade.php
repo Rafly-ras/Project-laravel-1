@@ -3,6 +3,27 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-8 text-gray-900 dark:text-gray-100">
+                    {{-- Breadcrumbs --}}
+                    <nav class="flex mb-6 text-gray-500 text-sm" aria-label="Breadcrumb">
+                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                            <li class="inline-flex items-center">
+                                <a href="{{ route('products.index') }}" class="hover:text-indigo-600 transition">Products</a>
+                            </li>
+                            <li>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 11 7.293 7.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                                    <a href="{{ route('transactions.index') }}" class="hover:text-indigo-600 transition">Transactions</a>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 11 7.293 7.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">Record Movement</span>
+                                </div>
+                            </li>
+                        </ol>
+                    </nav>
+
                     <div class="flex items-center justify-between mb-8">
                         <div>
                             <h1 class="text-3xl font-extrabold tracking-tight">Record Transaction</h1>
@@ -24,7 +45,7 @@
                                 <select name="product_id" id="product_id" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition sm:text-sm p-3" required>
                                     <option value="">Select a Product</option>
                                     @foreach($products as $product)
-                                        <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>
+                                        <option value="{{ $product->id }}" {{ old('product_id', $selectedProductId) == $product->id ? 'selected' : '' }}>
                                             {{ $product->name }} (Stock: {{ $product->stock }})
                                         </option>
                                     @endforeach

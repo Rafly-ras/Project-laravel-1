@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductTransactionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('products', ProductController::class);
     Route::get('transactions/export/csv', [ProductTransactionController::class, 'exportCsv'])->name('transactions.export.csv');
     Route::get('transactions/export/pdf', [ProductTransactionController::class, 'exportPdf'])->name('transactions.export.pdf');
+    Route::get('products/{product}/transactions/create', [ProductTransactionController::class, 'create'])->name('products.transactions.create');
     Route::resource('transactions', ProductTransactionController::class)->only(['index', 'create', 'store']);
 });
 
