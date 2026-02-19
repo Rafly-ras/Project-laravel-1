@@ -16,12 +16,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            RolePermissionSeeder::class,
+            AdminUserSeeder::class,
             CategorySeeder::class,
         ]);
-
-        User::updateOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User', 'password' => bcrypt('password')]
-        );
     }
 }
