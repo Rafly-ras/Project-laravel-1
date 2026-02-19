@@ -1,44 +1,35 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Edit Role') }}: {{ $role->name }}
+            {{ __('Create New Role') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-            <form action="{{ route('roles.update', $role) }}" method="POST">
+            <form action="{{ route('roles.store') }}" method="POST">
                 @csrf
-                @method('PUT')
                 
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-2xl p-8 border border-gray-100 dark:border-gray-700 mb-6">
                     <div>
                         <label for="name" class="block text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2">Role Name</label>
-                        <input type="text" name="name" id="name" value="{{ old('name', $role->name) }}" 
-                            {{ $role->name === 'Admin' ? 'readonly' : '' }}
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3 {{ $role->name === 'Admin' ? 'bg-gray-50 opacity-75' : '' }}" required>
+                        <input type="text" name="name" id="name" value="{{ old('name') }}" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3" required placeholder="e.g. Warehouse Staff, Manager">
                         @error('name')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        @if($role->name === 'Admin')
-                            <p class="mt-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">The Admin role name cannot be modified.</p>
-                        @endif
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     @foreach($permissions as $module => $modulePermissions)
                         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700">
-                            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
                                 <h3 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">{{ $module }}</h3>
-                                <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 116 0z" clip-rule="evenodd"></path></svg>
                             </div>
                             <div class="p-4 space-y-3">
                                 @foreach($modulePermissions as $permission)
-                                    <label class="flex items-center group cursor-pointer {{ $role->name === 'Admin' ? 'cursor-not-allowed opacity-75' : '' }}">
+                                    <label class="flex items-center group cursor-pointer">
                                         <input type="checkbox" name="permissions[]" value="{{ $permission->id }}" 
-                                            {{ in_array($permission->id, $rolePermissions) ? 'checked' : '' }}
-                                            {{ $role->name === 'Admin' ? 'disabled' : '' }}
                                             class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 transition">
                                         <span class="ms-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition">{{ $permission->name }}</span>
                                     </label>
@@ -48,17 +39,10 @@
                     @endforeach
                 </div>
 
-                @if($role->name === 'Admin')
-                    <input type="hidden" name="permissions[]" value=""> {{-- placeholder to ensure permissions array exists --}}
-                    @foreach($rolePermissions as $pid)
-                        <input type="hidden" name="permissions[]" value="{{ $pid }}">
-                    @endforeach
-                @endif
-
                 <div class="flex items-center justify-end space-x-4">
                     <a href="{{ route('roles.index') }}" class="text-sm font-bold text-gray-500 hover:text-gray-700 uppercase tracking-widest transition">Cancel</a>
                     <button type="submit" class="px-6 py-3 bg-indigo-600 text-white font-black rounded-lg hover:bg-indigo-700 shadow-sm hover:shadow-md transition transform hover:-translate-y-0.5">
-                        Update Role
+                        Create Role
                     </button>
                 </div>
             </form>

@@ -5,31 +5,53 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductTransaction;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $warehouseId = $request->query('warehouse_id');
+        
         $totalProducts = Product::count();
         $totalCategories = Category::count();
         
-        // Total Stock Value ($) = sum(product.price * product.stock)
-        $totalValue = Product::select(DB::raw('SUM(price * stock) as total'))->first()->total ?? 0;
+        $queryValue = Product::query();
+        $queryLowStock = Product::query();
+        $queryRecentTrans = ProductTransaction::with('product');
+
+        if ($warehouseId) {
+            $queryValue->whereHas('warehouses', function($q) use ($warehouseId) {
+                $q->where('warehouse_id', $warehouseId);
+            });
+            $queryLowStock->whereHas('warehouses', function($q) use ($warehouseId) {
+                $q->where('warehouse_id', $warehouseId)->where('stock', '<=', 5);
+            });
+            $queryRecentTrans->where('warehouse_id', $warehouseId);
+        }
+
+        // Total Stock Value ($) - this is tricky with pivot, let's just use products.stock for simplicity unless warehouse selected
+        $totalValue = $queryValue->select(DB::raw('SUM(price * stock) as total'))->first()->total ?? 0;
         
-        $lowStockCount = Product::where('stock', '<=', 5)->count();
+        $lowStockCount = $warehouseId ? $queryLowStock->count() : Product::where('stock', '<=', 5)->count();
         
-        $lowStockProducts = Product::with('category')
-            ->where('stock', '<=', 5)
+        $lowStockProducts = $queryLowStock->with('category')
             ->orderBy('stock', 'asc')
             ->limit(5)
             ->get();
             
-        $recentTransactions = ProductTransaction::with('product')
+        $recentTransactions = $queryRecentTrans->latest()
+            ->limit(5)
+            ->get();
+
+        $recentActivities = \App\Models\ActivityLog::with('user')
             ->latest()
             ->limit(5)
             ->get();
+
+        $warehouses = \App\Models\Warehouse::where('is_active', true)->get();
 
         return view('dashboard', compact(
             'totalProducts',
@@ -37,7 +59,38 @@ class DashboardController extends Controller
             'totalValue',
             'lowStockCount',
             'lowStockProducts',
-            'recentTransactions'
+            'recentTransactions',
+            'recentActivities',
+            'warehouses',
+            'warehouseId'
         ));
+    }
+
+    public function getChartData()
+    {
+        // Stock per category
+        $stockByCategory = Category::withSum('products', 'stock')
+            ->get()
+            ->map(fn($cat) => [
+                'label' => $cat->name,
+                'value' => $cat->products_sum_stock ?? 0
+            ]);
+
+        // Transactions per month (last 6 months)
+        $monthlyTransactions = ProductTransaction::select(
+                DB::raw('COUNT(*) as count'),
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month")
+            )
+            ->groupBy('month')
+            ->orderBy('month', 'desc')
+            ->limit(6)
+            ->get()
+            ->reverse()
+            ->values();
+
+        return response()->json([
+            'stockByCategory' => $stockByCategory,
+            'monthlyTransactions' => $monthlyTransactions,
+        ]);
     }
 }

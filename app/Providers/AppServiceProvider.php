@@ -23,18 +23,17 @@ class AppServiceProvider extends ServiceProvider
             return $user->isAdmin() ? true : null;
         });
 
-        // Define dynamic gates based on permission slugs
-        $permissions = [
-            'manage-products',
-            'manage-transactions',
-            'view-reports',
-            'manage-employees'
-        ];
-
-        foreach ($permissions as $permission) {
-            \Illuminate\Support\Facades\Gate::define($permission, function ($user) use ($permission) {
-                return $user->hasPermission($permission);
-            });
+        if (app()->runningInConsole() === false || app()->runningUnitTests()) {
+            try {
+                $permissions = \App\Models\Permission::all();
+                foreach ($permissions as $permission) {
+                    \Illuminate\Support\Facades\Gate::define($permission->slug, function ($user) use ($permission) {
+                        return $user->hasPermission($permission->slug);
+                    });
+                }
+            } catch (\Exception $e) {
+                // Database not ready yet
+            }
         }
     }
 }

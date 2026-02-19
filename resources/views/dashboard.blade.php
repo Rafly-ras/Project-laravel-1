@@ -8,6 +8,20 @@
     <div class="py-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
+            {{-- Warehouse Filter --}}
+            <div class="mb-8 flex justify-end">
+                <form action="{{ route('dashboard') }}" method="GET" class="flex items-center space-x-2">
+                    <label for="warehouse_id" class="text-xs font-bold text-gray-500 uppercase tracking-widest">Filter by Warehouse:</label>
+                    <select name="warehouse_id" id="warehouse_id" onchange="this.form.submit()" class="text-sm rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:ring-indigo-500 py-2 pr-10">
+                        <option value="">All Warehouses</option>
+                        @foreach($warehouses as $warehouse)
+                            <option value="{{ $warehouse->id }}" {{ $warehouseId == $warehouse->id ? 'selected' : '' }}>
+                                {{ $warehouse->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
             {{-- Quick Stats --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Total Products -->
@@ -65,33 +79,58 @@
 
             {{-- Shortcut Buttons --}}
             <div class="flex flex-wrap gap-4 mb-10">
-                @can('manage-products')
+                @can('products.view')
                     <a href="{{ route('products.index') }}" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-sm hover:shadow-md transition group">
                         <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                         Manage Products
                     </a>
                 @endcan
 
-                @can('manage-transactions')
+                @can('transactions.view')
                     <a href="{{ route('transactions.index') }}" class="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm hover:shadow-md transition group">
                         <svg class="w-5 h-5 mr-2 group-hover:rotate-12 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                         Transactions
                     </a>
                 @endcan
 
-                @can('view-reports')
+                @can('reports.view')
                     <a href="{{ route('products.stock-summary') }}" class="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl border border-emerald-100 dark:border-emerald-900/30 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 shadow-sm hover:shadow-md transition">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Stock Summary
                     </a>
                 @endcan
 
-                @can('manage-transactions')
+                @can('transactions.create')
                     <a href="{{ route('transactions.create') }}" class="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl border border-indigo-100 dark:border-indigo-900/30 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 shadow-sm hover:shadow-md transition">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                         Record Movement
                     </a>
                 @endcan
+            </div>
+
+            {{-- Charts Section --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <!-- Stock by Category (Pie/Doughnut) -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white mb-6 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                        Stock Distribution
+                    </h3>
+                    <div class="relative h-64">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Monthly Transactions (Line/Bar) -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white mb-6 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                        Transaction Trends
+                    </h3>
+                    <div class="relative h-64">
+                        <canvas id="transactionChart"></canvas>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -124,7 +163,7 @@
                                             <span class="font-black text-rose-600">{{ $product->stock }}</span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            @can('manage-transactions')
+                                            @can('transactions.create')
                                                 <a href="{{ route('products.transactions.create', $product) }}" class="text-indigo-600 hover:underline font-bold text-xs uppercase tracking-wider">Restock</a>
                                             @else
                                                 <span class="text-gray-400 text-xs uppercase tracking-wider italic">View Only</span>
@@ -186,7 +225,127 @@
                         </table>
                     </div>
                 </div>
+                {{-- Recent Activity Log --}}
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 mt-8">
+                    <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-700/30">
+                        <h3 class="text-lg font-black text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Audit Trail / Recent Activity
+                        </h3>
+                    </div>
+                    <div class="p-0">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700/50">
+                                <tr>
+                                    <th class="px-6 py-4">User</th>
+                                    <th class="px-6 py-4">Action</th>
+                                    <th class="px-6 py-4">Target</th>
+                                    <th class="px-6 py-4 text-right">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                @forelse($recentActivities as $log)
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="w-7 h-7 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full flex items-center justify-center font-bold text-xs mr-2">
+                                                    {{ substr($log->user->name ?? 'S', 0, 1) }}
+                                                </div>
+                                                <span class="font-medium text-gray-900 dark:text-white">{{ $log->user->name ?? 'System' }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black tracking-wider uppercase
+                                                {{ $log->action === 'created' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : '' }}
+                                                {{ $log->action === 'updated' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' : '' }}
+                                                {{ $log->action === 'deleted' ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400' : '' }}
+                                            ">
+                                                {{ $log->action }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-gray-500">
+                                            {{ class_basename($log->model_type) }} #{{ $log->model_id }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right text-xs text-gray-500">
+                                            {{ $log->created_at->diffForHumans() }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-10 text-center text-gray-400 italic">No activity recorded yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('{{ route('api.chart-data') }}')
+                .then(response => response.json())
+                .then(data => {
+                    // Category Chart
+                    const ctxCat = document.getElementById('categoryChart').getContext('2d');
+                    new Chart(ctxCat, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.stockByCategory.map(item => item.label),
+                            datasets: [{
+                                data: data.stockByCategory.map(item => item.value),
+                                backgroundColor: [
+                                    '#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
+                                ],
+                                borderWidth: 0,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            },
+                            cutout: '70%'
+                        }
+                    });
+
+                    // Transaction Chart
+                    const ctxTrans = document.getElementById('transactionChart').getContext('2d');
+                    new Chart(ctxTrans, {
+                        type: 'line',
+                        data: {
+                            labels: data.monthlyTransactions.map(item => item.month),
+                            datasets: [{
+                                label: 'Volume',
+                                data: data.monthlyTransactions.map(item => item.count),
+                                borderColor: '#4f46e5',
+                                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                borderWidth: 3,
+                                pointRadius: 4,
+                                pointBackgroundColor: '#4f46e5'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true, grid: { display: false } },
+                                x: { grid: { display: false } }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                });
+        });
+    </script>
+    @endpush
 </x-app-layout>

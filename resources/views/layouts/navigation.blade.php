@@ -16,19 +16,22 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    @can('manage-products')
+                    @can('products.view')
                         <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
                             {{ __('Products') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('warehouses.index')" :active="request()->routeIs('warehouses.*')">
+                            {{ __('Warehouses') }}
+                        </x-nav-link>
                     @endcan
 
-                    @can('manage-transactions')
+                    @can('transactions.view')
                         <x-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">
                             {{ __('Transactions') }}
                         </x-nav-link>
                     @endcan
 
-                    @can('manage-employees')
+                    @can('employees.manage')
                         <x-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
                             {{ __('Employees') }}
                         </x-nav-link>
@@ -38,6 +41,61 @@
                     @endcan
                 </div>
             </div>
+
+            <!-- Notifications Dropdown -->
+            @auth
+                <div class="hidden sm:flex sm:items-center sm:ms-3">
+                    <x-dropdown align="right" width="64">
+                        <x-slot name="trigger">
+                            <button class="relative p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                @if(auth()->user()->unreadNotifications->count() > 0)
+                                    <span class="absolute top-1.5 right-1.5 flex h-4 w-4">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-4 w-4 bg-rose-500 text-[10px] text-white font-bold items-center justify-center">
+                                            {{ auth()->user()->unreadNotifications->count() }}
+                                        </span>
+                                    </span>
+                                @endif
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            <div class="block px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700">
+                                Notifications
+                            </div>
+                            <div class="max-h-64 overflow-y-auto">
+                                @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
+                                    <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition border-b border-gray-50 dark:border-gray-700/50">
+                                        <p class="text-sm text-gray-900 dark:text-white leading-tight">
+                                            {{ $notification->data['message'] }}
+                                        </p>
+                                        <div class="mt-2 flex justify-between items-center text-[10px] text-gray-500">
+                                            <span>{{ $notification->created_at->diffForHumans() }}</span>
+                                            <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline italic">Mark as read</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="px-4 py-6 text-center text-gray-400 italic text-sm">
+                                        No unread notifications
+                                    </div>
+                                @endforelse
+                            </div>
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                                <form action="{{ route('notifications.markAllAsRead') }}" method="POST" class="border-t border-gray-100 dark:border-gray-700">
+                                    @csrf
+                                    <button type="submit" class="block w-full text-center px-4 py-2 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
+                                        Mark all as read
+                                    </button>
+                                </form>
+                            @endif
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+            @endauth
 
             <!-- Settings Dropdown -->
             @auth
@@ -99,19 +157,19 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            @can('manage-products')
+            @can('products.view')
                 <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
                     {{ __('Products') }}
                 </x-responsive-nav-link>
             @endcan
 
-            @can('manage-transactions')
+            @can('transactions.view')
                 <x-responsive-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">
                     {{ __('Transactions') }}
                 </x-responsive-nav-link>
             @endcan
 
-            @can('manage-employees')
+            @can('employees.manage')
                 <x-responsive-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
                     {{ __('Employees') }}
                 </x-responsive-nav-link>
