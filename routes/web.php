@@ -15,7 +15,10 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $lowStockProducts = \App\Models\Product::with('category')
+        ->where('stock', '<=', 5)
+        ->get();
+    return view('dashboard', compact('lowStockProducts'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 /*
@@ -37,7 +40,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::resource('posts', PostController::class)
         ->except(['show']);
+    Route::get('products/stock-summary', [ProductController::class, 'stockSummary'])->name('products.stock-summary');
     Route::resource('products', ProductController::class);
+    Route::get('transactions/export/csv', [ProductTransactionController::class, 'exportCsv'])->name('transactions.export.csv');
+    Route::get('transactions/export/pdf', [ProductTransactionController::class, 'exportPdf'])->name('transactions.export.pdf');
+    Route::resource('transactions', ProductTransactionController::class)->only(['index', 'create', 'store']);
 });
 
 
