@@ -18,6 +18,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\CashFlowReportController;
+use App\Http\Controllers\ProfitReportController;
 
 Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
 
@@ -94,6 +95,10 @@ Route::middleware('auth')->group(function () {
         Route::get('cashflow', [CashFlowReportController::class, 'index'])->name('reports.cashflow')->middleware('can:reports.cashflow');
         Route::get('cashflow/csv', [CashFlowReportController::class, 'exportCsv'])->name('reports.cashflow.csv')->middleware('can:reports.cashflow');
         Route::get('cashflow/pdf', [CashFlowReportController::class, 'exportPdf'])->name('reports.cashflow.pdf')->middleware('can:reports.cashflow');
+        
+        Route::get('profit', [ProfitReportController::class, 'index'])->name('reports.profit')->middleware('can:reports.profit');
+        Route::get('profit/csv', [ProfitReportController::class, 'exportCsv'])->name('reports.profit.csv')->middleware('can:reports.profit');
+        Route::get('profit/pdf', [ProfitReportController::class, 'exportPdf'])->name('reports.profit.pdf')->middleware('can:reports.profit');
         
         Route::get('request-orders', [ReportController::class, 'exportRequestOrders'])->name('reports.request-orders')->middleware('can:ro.view');
         Route::get('sales-orders', [ReportController::class, 'exportSalesOrders'])->name('reports.sales-orders')->middleware('can:so.view');
