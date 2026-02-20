@@ -119,6 +119,45 @@
                 </div>
             </div>
 
+            <!-- Profit Intelligence -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-indigo-600 rounded-3xl p-6 text-white relative group overflow-hidden shadow-xl shadow-indigo-200 dark:shadow-none">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition duration-500"></div>
+                    <p class="text-[10px] font-black uppercase text-indigo-100 tracking-[0.2em] mb-2">{{ now()->format('F') }} Net Profit</p>
+                    <h3 class="text-3xl font-black">${{ number_format($monthProfit['net_profit'], 2) }}</h3>
+                    <div class="mt-4 flex items-center text-[10px] bg-white/20 w-fit px-3 py-1 rounded-full font-bold uppercase tracking-widest">
+                         Accrual Performance
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 relative group overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition duration-500"></div>
+                    <p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-[0.2em] mb-2">Profit Margin %</p>
+                    <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($monthProfit['margin_percentage'], 1) }}%</h3>
+                    <div class="mt-4 flex items-center text-[10px] text-emerald-500 font-bold uppercase tracking-widest">
+                        Earnings Efficiency
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 relative group overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition duration-500"></div>
+                    <p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-[0.2em] mb-2">Best Performing Product</p>
+                    <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-tight truncate">{{ $topProducts->first()?->product->name ?? 'N/A' }}</h3>
+                    <div class="mt-4 flex items-center text-[10px] text-indigo-500 font-bold uppercase tracking-widest">
+                        Top Contributor
+                    </div>
+                </div>
+
+                <div class="bg-gray-900 dark:bg-gray-800 rounded-3xl p-6 text-white border border-gray-700 relative group overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition duration-500"></div>
+                    <p class="text-[10px] font-black uppercase text-indigo-400 tracking-[0.2em] mb-2">Most Profitable Month</p>
+                    <h3 class="text-3xl font-black text-white tracking-tight">{{ $bestMonth['month'] }}</h3>
+                    <div class="mt-4 flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                        Peak Performance
+                    </div>
+                </div>
+            </div>
+
             {{-- Operational Shortcuts --}}
             <div class="flex flex-wrap gap-4 mb-10">
                 @can('expenses.view')
@@ -127,6 +166,11 @@
                         Expenses Module
                     </a>
                 @endcan
+
+                <a href="{{ route('reports.profit') }}" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 dark:shadow-none transition group">
+                    <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Profit Report
+                </a>
 
                 <a href="{{ route('reports.cashflow') }}" class="inline-flex items-center px-6 py-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-black rounded-xl border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition shadow-sm group">
                     <svg class="w-5 h-5 mr-2 group-hover:rotate-12 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

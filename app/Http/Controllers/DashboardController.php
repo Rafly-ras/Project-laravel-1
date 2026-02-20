@@ -7,16 +7,19 @@ use App\Models\Category;
 use App\Models\ProductTransaction;
 use App\Models\ActivityLog;
 use App\Services\CashFlowService;
+use App\Services\ProfitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     protected $cashFlowService;
+    protected $profitService;
 
-    public function __construct(CashFlowService $cashFlowService)
+    public function __construct(CashFlowService $cashFlowService, ProfitService $profitService)
     {
         $this->cashFlowService = $cashFlowService;
+        $this->profitService = $profitService;
     }
 
     public function index(Request $request)
@@ -74,6 +77,10 @@ class DashboardController extends Controller
         $currentMonthStats = $this->cashFlowService->getCurrentMonthStats();
         $outstandingReceivables = $this->cashFlowService->getOutstandingReceivables();
 
+        $monthProfit = $this->profitService->getSummary(now()->startOfMonth(), now()->endOfMonth());
+        $topProducts = $this->profitService->getTopProducts(1);
+        $bestMonth = $this->profitService->getMostProfitableMonth();
+
         return view('dashboard', compact(
             'totalProducts',
             'totalCategories',
@@ -92,7 +99,10 @@ class DashboardController extends Controller
             'pendingROs',
             'unpaidInvoiceTotal',
             'currentMonthStats',
-            'outstandingReceivables'
+            'outstandingReceivables',
+            'monthProfit',
+            'topProducts',
+            'bestMonth'
         ));
     }
 
@@ -106,10 +116,13 @@ class DashboardController extends Controller
                 'value' => $cat->products_sum_stock ?? 0
             ]);
 
+        $isSqlite = DB::getDriverName() === 'sqlite';
+        $formatCreated = $isSqlite ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')";
+
         // Transactions per month (last 6 months)
         $monthlyTransactions = ProductTransaction::select(
                 DB::raw('COUNT(*) as count'),
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month")
+                DB::raw("$formatCreated as month")
             )
             ->groupBy('month')
             ->orderBy('month', 'desc')
@@ -118,10 +131,12 @@ class DashboardController extends Controller
             ->reverse()
             ->values();
 
+        $formatConfirmed = $isSqlite ? "strftime('%Y-%m', confirmed_at)" : "DATE_FORMAT(confirmed_at, '%Y-%m')";
+
         // Profit & Expense trends (last 6 months)
         $profitTrend = \App\Models\SalesOrder::select(
                 DB::raw('SUM(gross_profit) as total'),
-                DB::raw("DATE_FORMAT(confirmed_at, '%Y-%m') as month")
+                DB::raw("$formatConfirmed as month")
             )
             ->whereNotNull('confirmed_at')
             ->groupBy('month')
@@ -131,9 +146,11 @@ class DashboardController extends Controller
             ->reverse()
             ->values();
 
+        $formatExpense = $isSqlite ? "strftime('%Y-%m', expense_date)" : "DATE_FORMAT(expense_date, '%Y-%m')";
+
         $expenseTrend = \App\Models\Expense::select(
                 DB::raw('SUM(amount) as total'),
-                DB::raw("DATE_FORMAT(expense_date, '%Y-%m') as month")
+                DB::raw("$formatExpense as month")
             )
             ->groupBy('month')
             ->orderBy('month', 'desc')
