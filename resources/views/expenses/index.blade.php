@@ -33,7 +33,7 @@
                     </div>
                     <div class="flex-1 min-w-[200px]">
                         <label class="block text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-2">Month</label>
-                        <input type="month" name="month" value="{{ request('month') }}" class="w-full rounded-xl border-gray-100 dark:bg-gray-700 dark:border-gray-600 text-sm">
+                        <input type="date" name="month" value="{{ request('month') }}" onfocus="this.showPicker()" onkeydown="return false" class="w-full rounded-xl border-gray-100 dark:bg-gray-700 dark:border-gray-600 text-sm cursor-pointer" placeholder="Click to select month">
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" class="px-6 py-2.5 bg-gray-900 dark:bg-indigo-600 text-white font-black rounded-xl text-xs uppercase tracking-widest">Filter</button>
@@ -50,7 +50,6 @@
                             <th class="px-6 py-4">Category</th>
                             <th class="px-6 py-4">Description</th>
                             <th class="px-6 py-4 text-right">Amount</th>
-                            <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -66,17 +65,10 @@
                                 <td class="px-6 py-4 text-right font-black text-rose-600">
                                     ${{ number_format($expense->amount, 2) }}
                                 </td>
-                                <td class="px-6 py-4 text-right space-x-2">
-                                    <button onclick="editExpense({{ json_encode($expense) }})" class="text-indigo-600 hover:text-indigo-900 font-bold uppercase text-xs transition">Edit</button>
-                                    <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="inline">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Are you sure?')" class="text-rose-600 hover:text-rose-900 font-bold uppercase text-xs transition">Delete</button>
-                                    </form>
-                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic bg-gray-50/30">No expenses found for this period.</td>
+                                <td colspan="4" class="px-6 py-12 text-center text-gray-400 italic bg-gray-50/30">No expenses found for this period.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -124,52 +116,8 @@
         </div>
     </div>
 
-    <!-- Edit Expense Modal -->
-    <div id="editExpenseModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-lg w-full shadow-2xl">
-            <h3 class="text-xl font-black text-gray-900 dark:text-white mb-6">Edit Expense</h3>
-            <form id="editExpenseForm" method="POST">
-                @csrf @method('PUT')
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2">
-                        <label class="block text-xs font-black uppercase text-gray-400 tracking-widest mb-1">Category</label>
-                        <select id="edit_category_id" name="category_id" required class="w-full rounded-xl border-gray-200 dark:bg-gray-700 dark:border-gray-600">
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black uppercase text-gray-400 tracking-widest mb-1">Amount</label>
-                        <input type="number" step="0.01" id="edit_amount" name="amount" required class="w-full rounded-xl border-gray-200 dark:bg-gray-700 dark:border-gray-600">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black uppercase text-gray-400 tracking-widest mb-1">Date</label>
-                        <input type="date" id="edit_expense_date" name="expense_date" required class="w-full rounded-xl border-gray-200 dark:bg-gray-700 dark:border-gray-600">
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-xs font-black uppercase text-gray-400 tracking-widest mb-1">Description</label>
-                        <textarea id="edit_exp_description" name="description" class="w-full rounded-xl border-gray-200 dark:bg-gray-700 dark:border-gray-600" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="mt-8 flex justify-end space-x-3">
-                    <button type="button" onclick="closeModal('editExpenseModal')" class="px-6 py-2 text-gray-500 font-bold uppercase text-xs">Cancel</button>
-                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-black rounded-xl uppercase text-xs shadow-md">Update Expense</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function editExpense(expense) {
-            document.getElementById('editExpenseForm').action = `/finance/expenses/${expense.id}`;
-            document.getElementById('edit_category_id').value = expense.category_id;
-            document.getElementById('edit_amount').value = expense.amount;
-            document.getElementById('edit_expense_date').value = expense.expense_date.split('T')[0];
-            document.getElementById('edit_exp_description').value = expense.description || '';
-            openModal('editExpenseModal');
-        }
     </script>
 </x-app-layout>
