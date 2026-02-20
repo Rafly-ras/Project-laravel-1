@@ -2,46 +2,44 @@
 
 namespace App\Notifications;
 
+use App\Models\Product;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class LowStockNotification extends Notification
+class LowStockNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct(public $product, public $warehouse = null)
+    protected $product;
+
+    public function __construct(Product $product)
     {
+        $this->product = $product;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function via($notifiable): array
     {
-        return ['database'];
+        return ['mail', 'database'];
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
+    public function toMail($notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject("Low Stock Alert: {$this->product->name}")
+            ->line("The stock for product '{$this->product->name}' has dropped below the threshold.")
+            ->line("Current Stock: {$this->product->stock}")
+            ->action('View Product', route('products.show', $this->product))
+            ->line('Please restock as soon as possible to avoid fulfillment issues.');
+    }
+
+    public function toArray($notifiable): array
     {
         return [
-            'type' => 'low_stock',
             'product_id' => $this->product->id,
-            'product_name' => $this->product->name,
-            'warehouse_name' => $this->warehouse?->name ?? 'Total Stock',
             'stock' => $this->product->stock,
-            'message' => "Low stock alert: '{$this->product->name}' is at {$this->product->stock} units.",
+            'message' => "Low stock alert for {$this->product->name} (Current: {$this->product->stock})",
         ];
     }
 }

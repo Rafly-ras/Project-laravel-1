@@ -24,20 +24,26 @@ trait LogsActivity
     public function logActivity($event)
     {
         $description = $this->getActivityDescription($event);
-        $changes = null;
+        $beforeData = null;
+        $afterData = null;
 
         if ($event === 'updated') {
-            $changes = [
-                'old' => array_intersect_key($this->getOriginal(), $this->getDirty()),
-                'new' => $this->getDirty(),
-            ];
+            $changedFields = array_keys($this->getDirty());
+            $beforeData = array_intersect_key($this->getOriginal(), array_flip($changedFields));
+            $afterData = $this->getDirty();
             
-            // Remove sensitive fields or timestamps if needed
-            unset($changes['old']['updated_at'], $changes['new']['updated_at']);
+            // Remove timestamps from comparison
+            unset($beforeData['updated_at'], $afterData['updated_at']);
             
-            if (empty($changes['new'])) {
+            if (empty($afterData)) {
                 return; // No meaningful changes
             }
+        } elseif ($event === 'created') {
+            $afterData = $this->getAttributes();
+            unset($afterData['created_at'], $afterData['updated_at']);
+        } elseif ($event === 'deleted') {
+            $beforeData = $this->getOriginal();
+            unset($beforeData['created_at'], $beforeData['updated_at']);
         }
 
         ActivityLog::create([
@@ -46,7 +52,8 @@ trait LogsActivity
             'model_type' => get_class($this),
             'model_id' => $this->id,
             'description' => $description,
-            'changes' => $changes,
+            'before_data' => $beforeData,
+            'after_data' => $afterData,
             'ip_address' => request()->ip(),
         ]);
     }

@@ -12,12 +12,14 @@ class ActivityLog extends Model
         'model_type',
         'model_id',
         'description',
-        'changes',
+        'before_data',
+        'after_data',
         'ip_address'
     ];
 
     protected $casts = [
-        'changes' => 'array'
+        'before_data' => 'array',
+        'after_data' => 'array'
     ];
 
     public function user()

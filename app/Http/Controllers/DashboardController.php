@@ -54,7 +54,12 @@ class DashboardController extends Controller
         $warehouses = \App\Models\Warehouse::where('is_active', true)->get();
 
         // O2C Metrics
-        $totalRevenue = \App\Models\SalesOrder::where('status', '!=', 'cancelled')->sum('total_amount');
+        $totalRevenue = \App\Models\SalesOrder::where('status', '!=', 'cancelled')->whereNotNull('confirmed_at')->sum('total_amount');
+        $totalGrossProfit = \App\Models\SalesOrder::where('status', '!=', 'cancelled')->whereNotNull('confirmed_at')->sum('gross_profit');
+        $totalExpenses = \App\Models\Expense::sum('amount');
+        $netProfit = $totalGrossProfit - $totalExpenses;
+        $marginPercentage = $totalRevenue > 0 ? ($totalGrossProfit / $totalRevenue) * 100 : 0;
+
         $pendingROs = \App\Models\RequestOrder::where('status', 'draft')->count();
         $unpaidInvoiceTotal = \App\Models\Invoice::whereIn('status', ['unpaid', 'partial'])->get()->sum('remaining_balance');
 
@@ -69,6 +74,10 @@ class DashboardController extends Controller
             'warehouses',
             'warehouseId',
             'totalRevenue',
+            'totalGrossProfit',
+            'netProfit',
+            'totalExpenses',
+            'marginPercentage',
             'pendingROs',
             'unpaidInvoiceTotal'
         ));
@@ -96,9 +105,35 @@ class DashboardController extends Controller
             ->reverse()
             ->values();
 
+        // Profit & Expense trends (last 6 months)
+        $profitTrend = \App\Models\SalesOrder::select(
+                DB::raw('SUM(gross_profit) as total'),
+                DB::raw("DATE_FORMAT(confirmed_at, '%Y-%m') as month")
+            )
+            ->whereNotNull('confirmed_at')
+            ->groupBy('month')
+            ->orderBy('month', 'desc')
+            ->limit(6)
+            ->get()
+            ->reverse()
+            ->values();
+
+        $expenseTrend = \App\Models\Expense::select(
+                DB::raw('SUM(amount) as total'),
+                DB::raw("DATE_FORMAT(expense_date, '%Y-%m') as month")
+            )
+            ->groupBy('month')
+            ->orderBy('month', 'desc')
+            ->limit(6)
+            ->get()
+            ->reverse()
+            ->values();
+
         return response()->json([
             'stockByCategory' => $stockByCategory,
             'monthlyTransactions' => $monthlyTransactions,
+            'profitTrend' => $profitTrend,
+            'expenseTrend' => $expenseTrend,
         ]);
     }
 }
