@@ -6,11 +6,19 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductTransaction;
 use App\Models\ActivityLog;
+use App\Services\CashFlowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    protected $cashFlowService;
+
+    public function __construct(CashFlowService $cashFlowService)
+    {
+        $this->cashFlowService = $cashFlowService;
+    }
+
     public function index(Request $request)
     {
         $warehouseId = $request->query('warehouse_id');
@@ -63,6 +71,9 @@ class DashboardController extends Controller
         $pendingROs = \App\Models\RequestOrder::where('status', 'draft')->count();
         $unpaidInvoiceTotal = \App\Models\Invoice::whereIn('status', ['unpaid', 'partial'])->get()->sum('remaining_balance');
 
+        $currentMonthStats = $this->cashFlowService->getCurrentMonthStats();
+        $outstandingReceivables = $this->cashFlowService->getOutstandingReceivables();
+
         return view('dashboard', compact(
             'totalProducts',
             'totalCategories',
@@ -79,7 +90,9 @@ class DashboardController extends Controller
             'totalExpenses',
             'marginPercentage',
             'pendingROs',
-            'unpaidInvoiceTotal'
+            'unpaidInvoiceTotal',
+            'currentMonthStats',
+            'outstandingReceivables'
         ));
     }
 
