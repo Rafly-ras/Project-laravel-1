@@ -53,6 +53,11 @@ class DashboardController extends Controller
 
         $warehouses = \App\Models\Warehouse::where('is_active', true)->get();
 
+        // O2C Metrics
+        $totalRevenue = \App\Models\SalesOrder::where('status', '!=', 'cancelled')->sum('total_amount');
+        $pendingROs = \App\Models\RequestOrder::where('status', 'draft')->count();
+        $unpaidInvoiceTotal = \App\Models\Invoice::whereIn('status', ['unpaid', 'partial'])->get()->sum('remaining_balance');
+
         return view('dashboard', compact(
             'totalProducts',
             'totalCategories',
@@ -62,7 +67,10 @@ class DashboardController extends Controller
             'recentTransactions',
             'recentActivities',
             'warehouses',
-            'warehouseId'
+            'warehouseId',
+            'totalRevenue',
+            'pendingROs',
+            'unpaidInvoiceTotal'
         ));
     }
 
