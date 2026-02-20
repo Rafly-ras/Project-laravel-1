@@ -36,9 +36,15 @@ class SalesOrderController extends Controller
 
         DB::beginTransaction();
         try {
+            $totalGrossProfit = 0;
+
             foreach ($salesOrder->items as $item) {
                 $product = $item->product;
                 $warehouse = $item->warehouse;
+
+                // Profit calculation
+                $itemProfit = ($item->price - $product->cost_price) * $item->qty;
+                $totalGrossProfit += $itemProfit;
 
                 // Check warehouse stock
                 $pivot = $product->warehouses()->where('warehouse_id', $warehouse->id)->first();
@@ -66,9 +72,15 @@ class SalesOrderController extends Controller
                 ]);
             }
 
+            $marginPercentage = $salesOrder->total_amount > 0 
+                ? ($totalGrossProfit / $salesOrder->total_amount) * 100 
+                : 0;
+
             $salesOrder->update([
                 'status' => 'confirmed',
                 'confirmed_at' => now(),
+                'gross_profit' => $totalGrossProfit,
+                'margin_percentage' => $marginPercentage,
             ]);
 
             DB::commit();

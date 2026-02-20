@@ -16,6 +16,8 @@ class SalesOrder extends Model
         'customer_name',
         'status',
         'total_amount',
+        'gross_profit',
+        'margin_percentage',
         'created_by',
         'confirmed_at',
     ];

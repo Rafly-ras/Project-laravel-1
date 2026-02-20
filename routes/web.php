@@ -15,6 +15,8 @@ use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ExpenseCategoryController;
 
 Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
 
@@ -78,6 +80,12 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('can:payments.view')->group(function () {
         Route::resource('payments', PaymentController::class)->only(['index', 'store']);
+    });
+
+    // Finance & Expenses
+    Route::middleware('auth')->prefix('finance')->group(function () {
+        Route::resource('expenses', ExpenseController::class);
+        Route::resource('expense-categories', ExpenseCategoryController::class);
     });
 
     // O2C Reports
