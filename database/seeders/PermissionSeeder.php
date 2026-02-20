@@ -38,6 +38,7 @@ class PermissionSeeder extends Seeder
 
             // Reports & Dashboard
             ['name' => 'View Reports', 'slug' => 'reports.view'],
+            ['name' => 'View Cashflow', 'slug' => 'reports.cashflow'],
             ['name' => 'View Activity Logs', 'slug' => 'logs.view'],
         ];
 

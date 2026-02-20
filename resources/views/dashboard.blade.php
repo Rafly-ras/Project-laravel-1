@@ -80,6 +80,45 @@
                 </div>
             </div>
 
+            <!-- Liquidity Intelligence -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-gray-900 rounded-3xl p-6 text-white relative group overflow-hidden shadow-xl shadow-indigo-100 dark:shadow-none">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/20 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition duration-500"></div>
+                    <p class="text-[10px] font-black uppercase text-indigo-400 tracking-[0.2em] mb-2">Monthly Cash In</p>
+                    <h3 class="text-3xl font-black">${{ number_format($currentMonthStats['revenue'], 2) }}</h3>
+                    <div class="mt-4 flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                         {{ now()->format('F') }} Liquidity
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 relative group overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition duration-500"></div>
+                    <p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-[0.2em] mb-2">Outstanding Recv.</p>
+                    <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">${{ number_format($outstandingReceivables, 2) }}</h3>
+                    <div class="mt-4 flex items-center text-[10px] text-emerald-500 font-bold uppercase tracking-widest">
+                        Receivable Assets
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 relative group overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition duration-500"></div>
+                    <p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-[0.2em] mb-2">Monthly Expenses</p>
+                    <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">${{ number_format($currentMonthStats['expense'], 2) }}</h3>
+                    <div class="mt-4 flex items-center text-[10px] text-rose-500 font-bold uppercase tracking-widest">
+                        Total Outflow
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border-2 border-indigo-50 dark:border-indigo-900/30 relative group overflow-hidden shadow-lg shadow-indigo-50/50 dark:shadow-none">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition duration-500"></div>
+                    <p class="text-[10px] font-black uppercase text-indigo-600 tracking-[0.2em] mb-2">Monthly Net Result</p>
+                    <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">${{ number_format($currentMonthStats['net'], 2) }}</h3>
+                    <div class="mt-4 flex items-center text-[10px] {{ $currentMonthStats['net'] >= 0 ? 'text-emerald-500' : 'text-rose-500' }} font-bold uppercase tracking-widest">
+                        {{ $currentMonthStats['net'] >= 0 ? 'Surplus' : 'Deficit' }}
+                    </div>
+                </div>
+            </div>
+
             {{-- Operational Shortcuts --}}
             <div class="flex flex-wrap gap-4 mb-10">
                 @can('expenses.view')
@@ -88,6 +127,11 @@
                         Expenses Module
                     </a>
                 @endcan
+
+                <a href="{{ route('reports.cashflow') }}" class="inline-flex items-center px-6 py-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-black rounded-xl border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition shadow-sm group">
+                    <svg class="w-5 h-5 mr-2 group-hover:rotate-12 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Cash Flow Report
+                </a>
 
                 @can('products.view')
                     <a href="{{ route('products.index') }}" class="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 shadow-sm transition group">

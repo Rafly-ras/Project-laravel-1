@@ -17,6 +17,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\CashFlowReportController;
 
 Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
 
@@ -90,6 +91,10 @@ Route::middleware('auth')->group(function () {
 
     // O2C Reports
     Route::middleware('auth')->prefix('reports')->group(function () {
+        Route::get('cashflow', [CashFlowReportController::class, 'index'])->name('reports.cashflow')->middleware('can:reports.cashflow');
+        Route::get('cashflow/csv', [CashFlowReportController::class, 'exportCsv'])->name('reports.cashflow.csv')->middleware('can:reports.cashflow');
+        Route::get('cashflow/pdf', [CashFlowReportController::class, 'exportPdf'])->name('reports.cashflow.pdf')->middleware('can:reports.cashflow');
+        
         Route::get('request-orders', [ReportController::class, 'exportRequestOrders'])->name('reports.request-orders')->middleware('can:ro.view');
         Route::get('sales-orders', [ReportController::class, 'exportSalesOrders'])->name('reports.sales-orders')->middleware('can:so.view');
         Route::get('invoices', [ReportController::class, 'exportInvoices'])->name('reports.invoices')->middleware('can:invoices.view');
