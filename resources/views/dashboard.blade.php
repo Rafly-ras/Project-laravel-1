@@ -1,8 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Inventory Dashboard') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Inventory Dashboard') }}
+            </h2>
+            <a href="{{ route('reports.master-o2c') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-700 shadow-md transition transform hover:-translate-y-0.5 text-xs uppercase tracking-[0.2em]">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Master O2C Report
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -22,6 +28,37 @@
                     </select>
                 </form>
             </div>
+            <!-- O2C Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="bg-indigo-600 rounded-3xl p-8 shadow-xl shadow-indigo-200 dark:shadow-none text-white overflow-hidden relative group">
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2">Total Revenue</p>
+                        <h3 class="text-4xl font-black">${{ number_format($totalRevenue, 2) }}</h3>
+                        <div class="mt-4 flex items-center text-xs font-bold bg-white/10 w-fit px-3 py-1 rounded-full">
+                            Lifespan Sales
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative group">
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2">Pending Requests</p>
+                        <h3 class="text-4xl font-black text-gray-900 dark:text-white">{{ $pendingROs }}</h3>
+                        <a href="{{ route('request-orders.index') }}" class="mt-4 inline-block text-xs font-bold text-indigo-600 hover:underline">View RO Queue →</a>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative group">
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2">Outstanding Balance</p>
+                        <h3 class="text-4xl font-black text-rose-500">${{ number_format($unpaidInvoiceTotal, 2) }}</h3>
+                        <div class="mt-4 flex items-center text-xs font-black text-rose-500 uppercase tracking-widest bg-rose-50 dark:bg-rose-900/20 w-fit px-3 py-1 rounded-full">
+                            Unpaid Invoices
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Quick Stats --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Total Products -->

@@ -31,6 +31,30 @@
                         </x-nav-link>
                     @endcan
 
+                    @can('ro.view')
+                        <x-nav-link :href="route('request-orders.index')" :active="request()->routeIs('request-orders.*')">
+                            {{ __('Requests') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @can('so.view')
+                        <x-nav-link :href="route('sales-orders.index')" :active="request()->routeIs('sales-orders.*')">
+                            {{ __('Sales') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @can('invoices.view')
+                        <x-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+                            {{ __('Invoices') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @can('payments.view')
+                        <x-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.*')">
+                            {{ __('Payments') }}
+                        </x-nav-link>
+                    @endcan
+
                     @can('employees.manage')
                         <x-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
                             {{ __('Employees') }}
@@ -166,6 +190,30 @@
             @can('transactions.view')
                 <x-responsive-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">
                     {{ __('Transactions') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('ro.view')
+                <x-responsive-nav-link :href="route('request-orders.index')" :active="request()->routeIs('request-orders.*')">
+                    {{ __('Requests') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('so.view')
+                <x-responsive-nav-link :href="route('sales-orders.index')" :active="request()->routeIs('sales-orders.*')">
+                    {{ __('Sales Orders') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('invoices.view')
+                <x-responsive-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+                    {{ __('Invoices') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('payments.view')
+                <x-responsive-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.*')">
+                    {{ __('Payments') }}
                 </x-responsive-nav-link>
             @endcan
 
