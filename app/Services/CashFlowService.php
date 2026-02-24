@@ -15,8 +15,8 @@ class CashFlowService
      */
     public function getSummary($startDate, $endDate)
     {
-        $cashIn = Payment::whereBetween('paid_at', [$startDate, $endDate])->sum('amount');
-        $cashOut = Expense::whereBetween('expense_date', [$startDate, $endDate])->sum('amount');
+        $cashIn = Payment::whereBetween('paid_at', [$startDate, $endDate])->sum('base_amount');
+        $cashOut = Expense::whereBetween('expense_date', [$startDate, $endDate])->sum('base_amount');
 
         return [
             'cash_in' => $cashIn,
@@ -58,8 +58,8 @@ class CashFlowService
             $startOfMonth = $date->copy()->startOfMonth();
             $endOfMonth = $date->copy()->endOfMonth();
 
-            $cashIn = Payment::whereBetween('paid_at', [$startOfMonth, $endOfMonth])->sum('amount');
-            $cashOut = Expense::whereBetween('expense_date', [$startOfMonth, $endOfMonth])->sum('amount');
+            $cashIn = Payment::whereBetween('paid_at', [$startOfMonth, $endOfMonth])->sum('base_amount');
+            $cashOut = Expense::whereBetween('expense_date', [$startOfMonth, $endOfMonth])->sum('base_amount');
 
             $data[] = [
                 'month' => $date->format('M Y'),
@@ -78,10 +78,10 @@ class CashFlowService
     public function getOutstandingReceivables()
     {
         return Invoice::where('status', '!=', 'paid')
-            ->withSum('payments', 'amount')
+            ->withSum('payments', 'base_amount')
             ->get()
             ->sum(function ($invoice) {
-                return $invoice->total_amount - ($invoice->payments_sum_amount ?? 0);
+                return $invoice->base_amount - ($invoice->payments_sum_base_amount ?? 0);
             });
     }
 
@@ -93,8 +93,8 @@ class CashFlowService
         $start = now()->startOfMonth();
         $end = now()->endOfMonth();
 
-        $cashIn = Payment::whereBetween('paid_at', [$start, $end])->sum('amount');
-        $cashOut = Expense::whereBetween('expense_date', [$start, $end])->sum('amount');
+        $cashIn = Payment::whereBetween('paid_at', [$start, $end])->sum('base_amount');
+        $cashOut = Expense::whereBetween('expense_date', [$start, $end])->sum('base_amount');
 
         return [
             'revenue' => $cashIn,

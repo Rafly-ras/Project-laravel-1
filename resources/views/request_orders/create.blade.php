@@ -11,7 +11,7 @@
                 <form action="{{ route('request-orders.store') }}" method="POST" id="ro-form">
                     @csrf
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                         <div>
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Customer Name</label>
                             <input type="text" name="customer_name" required class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white font-bold" placeholder="e.g. John Doe">
@@ -19,6 +19,16 @@
                         <div>
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Customer Email</label>
                             <input type="email" name="customer_email" class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white font-bold" placeholder="john@example.com">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Currency</label>
+                            <select name="currency_id" required class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white font-bold">
+                                @foreach($currencies as $currency)
+                                    <option value="{{ $currency->id }}" {{ $currency->is_base ? 'selected' : '' }}>
+                                        {{ $currency->code }} - {{ $currency->name }} ({{ $currency->symbol }})
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
 

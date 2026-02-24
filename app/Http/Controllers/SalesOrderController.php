@@ -105,6 +105,8 @@ class SalesOrderController extends Controller
         try {
             $invoice = Invoice::create([
                 'sales_order_id' => $salesOrder->id,
+                'currency_id' => $salesOrder->currency_id,
+                'exchange_rate' => $salesOrder->exchange_rate,
                 'due_date' => now()->addDays(14),
                 'total_amount' => $salesOrder->total_amount,
                 'status' => 'unpaid',

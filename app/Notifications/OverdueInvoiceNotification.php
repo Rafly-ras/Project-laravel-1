@@ -27,9 +27,9 @@ class OverdueInvoiceNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Payment Reminder: Invoice #{$this->invoice->salesOrder->sales_number}")
+            ->subject("Payment Reminder: Invoice {$this->invoice->salesOrder->sales_number}")
             ->greeting("Hello!")
-            ->line("This is a reminder that your invoice #{$this->invoice->salesOrder->sales_number} is overdue.")
+            ->line("This is a reminder that your invoice {$this->invoice->salesOrder->sales_number} is overdue.")
             ->line("Amount Due: $" . number_format($this->invoice->remaining_balance, 2))
             ->line("Due Date: " . $this->invoice->due_date->format('M d, Y'))
             ->action('View Invoice', route('invoices.show', $this->invoice))
@@ -41,7 +41,7 @@ class OverdueInvoiceNotification extends Notification implements ShouldQueue
         return [
             'invoice_id' => $this->invoice->id,
             'amount' => $this->invoice->remaining_balance,
-            'message' => "Invoice #{$this->invoice->salesOrder->sales_number} is overdue.",
+            'message' => "Invoice {$this->invoice->salesOrder->sales_number} is overdue.",
         ];
     }
 }

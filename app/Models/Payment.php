@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasSequentialNumber;
+use App\Traits\HasMultiCurrency;
 use App\Traits\LogsActivity;
 
 class Payment extends Model
 {
-    use HasSequentialNumber, LogsActivity;
+    use HasSequentialNumber, LogsActivity, HasMultiCurrency;
 
     protected $fillable = [
         'invoice_id',
@@ -18,6 +19,9 @@ class Payment extends Model
         'reference_number',
         'paid_at',
         'created_by',
+        'currency_id',
+        'exchange_rate',
+        'base_amount',
     ];
 
     protected function casts(): array

@@ -22,8 +22,8 @@
             }
         </script>
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-saas-bg dark:bg-gray-900">
+    <body class="font-sans antialiased overflow-x-hidden">
+        <div class="min-h-screen bg-saas-bg dark:bg-gray-900 overflow-x-hidden w-full">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
@@ -36,7 +36,7 @@
             @endisset
 
             <!-- Page Content -->
-            <main>
+            <main class="overflow-x-hidden w-full max-w-full">
                 {{ $slot }}
             </main>
         </div>

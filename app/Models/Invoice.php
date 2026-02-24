@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasSequentialNumber;
+use App\Traits\HasMultiCurrency;
 use App\Traits\LogsActivity;
 
 class Invoice extends Model
 {
-    use HasSequentialNumber, LogsActivity;
+    use HasSequentialNumber, LogsActivity, HasMultiCurrency;
 
     protected $fillable = [
         'invoice_number',
@@ -17,7 +18,15 @@ class Invoice extends Model
         'total_amount',
         'status',
         'issued_at',
+        'currency_id',
+        'exchange_rate',
+        'base_amount',
     ];
+
+    public function getAmountField()
+    {
+        return 'total_amount';
+    }
 
     protected function casts(): array
     {

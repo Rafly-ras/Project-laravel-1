@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasSequentialNumber;
+use App\Traits\HasMultiCurrency;
 use App\Traits\LogsActivity;
 
 class SalesOrder extends Model
 {
-    use HasSequentialNumber, LogsActivity;
+    use HasSequentialNumber, LogsActivity, HasMultiCurrency;
 
     protected $fillable = [
         'sales_number',
@@ -20,7 +21,15 @@ class SalesOrder extends Model
         'margin_percentage',
         'created_by',
         'confirmed_at',
+        'currency_id',
+        'exchange_rate',
+        'base_amount',
     ];
+
+    public function getAmountField()
+    {
+        return 'total_amount';
+    }
 
     protected function casts(): array
     {

@@ -32,14 +32,14 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
-                                @foreach($invoice->salesOrder->items as $item)
-                                    <tr>
-                                        <td class="py-4 font-bold text-gray-900 dark:text-white">{{ $item->product->name }}</td>
-                                        <td class="py-4 text-center">{{ $item->qty }}</td>
-                                        <td class="py-4 text-right text-gray-500">${{ number_format($item->price, 2) }}</td>
-                                        <td class="py-4 text-right font-black text-gray-900 dark:text-white">${{ number_format($item->subtotal, 2) }}</td>
-                                    </tr>
-                                @endforeach
+                                    @foreach($invoice->salesOrder->items as $item)
+                                        <tr>
+                                            <td class="py-4 font-bold text-gray-900 dark:text-white">{{ $item->product->name }}</td>
+                                            <td class="py-4 text-center">{{ $item->qty }}</td>
+                                            <td class="py-4 text-right text-gray-500">{{ $invoice->currency->symbol }}{{ number_format($item->price, 2) }}</td>
+                                            <td class="py-4 text-right font-black text-gray-900 dark:text-white">{{ $invoice->currency->symbol }}{{ number_format($item->subtotal, 2) }}</td>
+                                        </tr>
+                                    @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -60,7 +60,10 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="font-black text-emerald-600">${{ number_format($payment->amount, 2) }}</div>
+                                        <div class="font-black text-emerald-600">{{ $payment->formatted_amount }}</div>
+                                        @if(!$payment->currency->is_base)
+                                            <div class="text-[10px] text-gray-400 font-bold uppercase">≈ {{ $payment->formatted_base_amount }}</div>
+                                        @endif
                                         <div class="text-[10px] text-gray-400 font-bold">{{ $payment->paid_at }}</div>
                                     </div>
                                 </div>
@@ -76,15 +79,24 @@
                     <!-- Balance Card -->
                     <div class="bg-indigo-600 p-8 rounded-2xl shadow-xl text-white">
                         <div class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2">Remaining Balance</div>
-                        <div class="text-4xl font-black mb-6">${{ number_format($invoice->remaining_balance, 2) }}</div>
+                        <div class="text-4xl font-black mb-1">
+                            {{ $invoice->currency->symbol }}{{ number_format($invoice->remaining_balance, 2) }}
+                        </div>
+                        @if(!$invoice->currency->is_base)
+                            <div class="text-[10px] font-black uppercase opacity-60 mb-6 tracking-widest">
+                                ≈ {{ app(\App\Services\CurrencyService::class)->format($invoice->base_amount - $invoice->payments()->sum('base_amount')) }} (BASE)
+                            </div>
+                        @else
+                            <div class="mb-6"></div>
+                        @endif
                         <div class="space-y-3 pt-6 border-t border-white/10">
                             <div class="flex justify-between text-xs font-bold">
                                 <span class="opacity-80">Total Billed:</span>
-                                <span>${{ number_format($invoice->total_amount, 2) }}</span>
+                                <span>{{ $invoice->formatted_amount }}</span>
                             </div>
                             <div class="flex justify-between text-xs font-bold">
                                 <span class="opacity-80">Total Paid:</span>
-                                <span class="text-emerald-300">${{ number_format($invoice->paid_amount, 2) }}</span>
+                                <span class="text-emerald-300">{{ app(\App\Services\CurrencyService::class)->format($invoice->payments()->sum('amount'), $invoice->currency_id) }}</span>
                             </div>
                         </div>
                     </div>
@@ -98,18 +110,28 @@
                                     @csrf
                                     <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
                                     
-                                    <div>
-                                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Amount</label>
-                                        <input type="number" id="payment-amount" name="amount" value="{{ $invoice->remaining_balance }}" readonly required class="w-full bg-gray-100 dark:bg-gray-950 border-none rounded-xl text-gray-500 cursor-not-allowed font-bold">
-                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="col-span-2">
+                                            <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Currency</label>
+                                            <select name="currency_id" required class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 font-bold">
+                                                <option value="{{ $invoice->currency_id }}" selected>{{ $invoice->currency->code }} - {{ $invoice->currency->name }}</option>
+                                                {{-- Usually payments match invoice, but we allow user to pick if needed? 
+                                                     For now we stick to invoice currency for simplicity or add other actives --}}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Amount</label>
+                                            <input type="number" id="payment-amount" step="0.01" name="amount" value="{{ $invoice->remaining_balance }}" readonly required class="w-full bg-gray-100 dark:bg-gray-950 border-none rounded-xl text-gray-500 cursor-not-allowed font-bold">
+                                        </div>
 
-                                    <div>
-                                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Method</label>
-                                        <select name="payment_method" required class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 font-bold">
-                                            <option value="cash">Cash</option>
-                                            <option value="transfer">Bank Transfer</option>
-                                            <option value="e-wallet">E-Wallet</option>
-                                        </select>
+                                        <div>
+                                            <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Method</label>
+                                            <select name="payment_method" required class="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 font-bold">
+                                                <option value="cash">Cash</option>
+                                                <option value="transfer">Bank Transfer</option>
+                                                <option value="e-wallet">E-Wallet</option>
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div>

@@ -64,19 +64,19 @@ class DashboardController extends Controller
 
         $warehouses = \App\Models\Warehouse::where('is_active', true)->get();
 
-        // O2C Metrics
-        $totalRevenue = \App\Models\SalesOrder::where('status', '!=', 'cancelled')->whereNotNull('confirmed_at')->sum('total_amount');
-        $totalGrossProfit = \App\Models\SalesOrder::where('status', '!=', 'cancelled')->whereNotNull('confirmed_at')->sum('gross_profit');
-        $totalExpenses = \App\Models\Expense::sum('amount');
+        // O2C Metrics in Base Currency
+        $totalRevenue = \App\Models\SalesOrder::where('status', '!=', 'cancelled')->whereNotNull('confirmed_at')->sum('base_amount');
+        $totalGrossProfit = \App\Models\SalesOrder::where('status', '!=', 'cancelled')->whereNotNull('confirmed_at')->sum('base_gross_profit');
+        $totalExpenses = \App\Models\Expense::sum('base_amount');
         $netProfit = $totalGrossProfit - $totalExpenses;
         $marginPercentage = $totalRevenue > 0 ? ($totalGrossProfit / $totalRevenue) * 100 : 0;
 
         $pendingROs = \App\Models\RequestOrder::where('status', 'draft')->count();
         $unpaidInvoiceTotal = \App\Models\Invoice::whereIn('status', ['unpaid', 'partial'])
-            ->withSum('payments', 'amount')
+            ->withSum('payments', 'base_amount')
             ->get()
             ->sum(function ($invoice) {
-                return $invoice->total_amount - ($invoice->payments_sum_amount ?? 0);
+                return $invoice->base_amount - ($invoice->payments_sum_base_amount ?? 0);
             });
 
         $currentMonthStats = $this->cashFlowService->getCurrentMonthStats();

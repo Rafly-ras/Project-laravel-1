@@ -19,9 +19,9 @@ class ProfitService
         $confirmedOrders = SalesOrder::whereBetween('confirmed_at', [$startDate, $endDate])
             ->where('status', '!=', 'cancelled');
 
-        $revenue = $confirmedOrders->sum('total_amount');
-        $grossProfit = $confirmedOrders->sum('gross_profit');
-        $expenses = Expense::whereBetween('expense_date', [$startDate, $endDate])->sum('amount');
+        $revenue = $confirmedOrders->sum('base_amount');
+        $grossProfit = $confirmedOrders->sum('base_gross_profit');
+        $expenses = Expense::whereBetween('expense_date', [$startDate, $endDate])->sum('base_amount');
         
         $cogs = $revenue - $grossProfit;
         $netProfit = $grossProfit - $expenses;
@@ -63,9 +63,9 @@ class ProfitService
             $confirmedOrders = SalesOrder::whereBetween('confirmed_at', [$start, $end])
                 ->where('status', '!=', 'cancelled');
 
-            $revenue = $confirmedOrders->sum('total_amount');
-            $grossProfit = $confirmedOrders->sum('gross_profit');
-            $expenses = Expense::whereBetween('expense_date', [$start, $end])->sum('amount');
+            $revenue = $confirmedOrders->sum('base_amount');
+            $grossProfit = $confirmedOrders->sum('base_gross_profit');
+            $expenses = Expense::whereBetween('expense_date', [$start, $end])->sum('base_amount');
 
             $data[] = [
                 'month' => $monthDate->format('M Y'),
@@ -107,7 +107,7 @@ class ProfitService
 
         $monthlyData = SalesOrder::select(
                 DB::raw("$dateFormat as month"),
-                DB::raw('SUM(gross_profit) as profit')
+                DB::raw('SUM(base_gross_profit) as profit')
             )
             ->whereNotNull('confirmed_at')
             ->whereBetween('confirmed_at', [$startOfYear, $endOfYear])
@@ -118,7 +118,7 @@ class ProfitService
 
         $expenses = Expense::select(
                 DB::raw("$dateFormatExp as month"),
-                DB::raw('SUM(amount) as cost')
+                DB::raw('SUM(base_amount) as cost')
             )
             ->whereBetween('expense_date', [$startOfYear, $endOfYear])
             ->groupBy('month')

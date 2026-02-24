@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\Currency;
 use App\Http\Requests\StoreExpenseRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +13,7 @@ class ExpenseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Expense::with('category', 'creator');
+        $query = Expense::with('category', 'creator', 'currency');
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
@@ -25,8 +26,9 @@ class ExpenseController extends Controller
 
         $expenses = $query->latest('expense_date')->paginate(15);
         $categories = ExpenseCategory::all();
+        $currencies = Currency::where('is_active', true)->get();
 
-        return view('expenses.index', compact('expenses', 'categories'));
+        return view('expenses.index', compact('expenses', 'categories', 'currencies'));
     }
 
     public function store(StoreExpenseRequest $request)
