@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-saas-border dark:border-gray-700 shadow-saas relative z-20">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -66,6 +66,30 @@
                 </div>
             </div>
 
+            <!-- Dark Mode Toggle -->
+            <div class="hidden sm:flex sm:items-center sm:ms-3">
+                <button
+                    x-data="{
+                        darkMode: localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+                        toggle() {
+                            this.darkMode = !this.darkMode;
+                            if (this.darkMode) {
+                                document.documentElement.classList.add('dark');
+                                localStorage.theme = 'dark';
+                            } else {
+                                document.documentElement.classList.remove('dark');
+                                localStorage.theme = 'light';
+                            }
+                        }
+                    }"
+                    @click="toggle()"
+                    class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none transition"
+                >
+                    <svg x-show="!darkMode" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg x-show="darkMode" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m3.343-5.657l.707.707m12.728 12.728l.707.707M6.343 17.657l-.707.707M17.657 6.343l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+            </div>
+
             <!-- Notifications Dropdown -->
             @auth
                 <div class="hidden sm:flex sm:items-center sm:ms-3">
@@ -98,7 +122,7 @@
                                             <span>{{ $notification->created_at->diffForHumans() }}</span>
                                             <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST">
                                                 @csrf
-                                                <button type="submit" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline italic">Mark as read</button>
+                                                <button type="submit" class="text-primary-600 dark:text-primary-400 font-bold hover:underline italic">Mark as read</button>
                                             </form>
                                         </div>
                                     </div>
@@ -111,7 +135,7 @@
                             @if(auth()->user()->unreadNotifications->count() > 0)
                                 <form action="{{ route('notifications.markAllAsRead') }}" method="POST" class="border-t border-gray-100 dark:border-gray-700">
                                     @csrf
-                                    <button type="submit" class="block w-full text-center px-4 py-2 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
+                                    <button type="submit" class="block w-full text-center px-4 py-2 text-xs font-bold text-primary-600 hover:text-primary-700 transition">
                                         Mark all as read
                                     </button>
                                 </form>
@@ -177,6 +201,33 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
+            <!-- Dark Mode Toggle (Mobile) -->
+            <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                <button
+                    x-data="{
+                        darkMode: localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+                        toggle() {
+                            this.darkMode = !this.darkMode;
+                            if (this.darkMode) {
+                                document.documentElement.classList.add('dark');
+                                localStorage.theme = 'dark';
+                            } else {
+                                document.documentElement.classList.remove('dark');
+                                localStorage.theme = 'light';
+                            }
+                        }
+                    }"
+                    @click="toggle()"
+                    class="flex items-center w-full text-left text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
+                >
+                    <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-md me-3">
+                        <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                        <svg x-show="darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m3.343-5.657l.707.707m12.728 12.728l.707.707M6.343 17.657l-.707.707M17.657 6.343l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <span x-text="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"></span>
+                </button>
+            </div>
+
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>

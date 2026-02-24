@@ -77,9 +77,12 @@ class CashFlowService
      */
     public function getOutstandingReceivables()
     {
-        return Invoice::where('status', '!=', 'paid')->get()->sum(function ($invoice) {
-            return $invoice->remaining_balance;
-        });
+        return Invoice::where('status', '!=', 'paid')
+            ->withSum('payments', 'amount')
+            ->get()
+            ->sum(function ($invoice) {
+                return $invoice->total_amount - ($invoice->payments_sum_amount ?? 0);
+            });
     }
 
     /**
