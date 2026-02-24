@@ -72,7 +72,12 @@ class DashboardController extends Controller
         $marginPercentage = $totalRevenue > 0 ? ($totalGrossProfit / $totalRevenue) * 100 : 0;
 
         $pendingROs = \App\Models\RequestOrder::where('status', 'draft')->count();
-        $unpaidInvoiceTotal = \App\Models\Invoice::whereIn('status', ['unpaid', 'partial'])->get()->sum('remaining_balance');
+        $unpaidInvoiceTotal = \App\Models\Invoice::whereIn('status', ['unpaid', 'partial'])
+            ->withSum('payments', 'amount')
+            ->get()
+            ->sum(function ($invoice) {
+                return $invoice->total_amount - ($invoice->payments_sum_amount ?? 0);
+            });
 
         $currentMonthStats = $this->cashFlowService->getCurrentMonthStats();
         $outstandingReceivables = $this->cashFlowService->getOutstandingReceivables();
