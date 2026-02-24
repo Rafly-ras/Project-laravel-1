@@ -4,48 +4,66 @@
             <h2 class="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Payment History') }}
             </h2>
-            <div class="flex gap-2">
-                <a href="{{ route('reports.payments', ['format' => 'excel']) }}" class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-sm transition text-xs uppercase tracking-widest">Excel</a>
-                <a href="{{ route('reports.payments', ['format' => 'pdf']) }}" class="inline-flex items-center px-4 py-2 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 shadow-sm transition text-xs uppercase tracking-widest">PDF</a>
+            <div class="flex gap-3">
+                <a href="{{ route('reports.payments', ['format' => 'excel']) }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-emerald-600 dark:text-emerald-400 font-black rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 shadow-sm transition-all duration-200 text-[10px] uppercase tracking-[0.2em] group">
+                    <svg class="w-4 h-4 mr-2 opacity-60 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Excel
+                </a>
+                <a href="{{ route('reports.payments', ['format' => 'pdf']) }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-rose-600 dark:text-rose-400 font-black rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/20 shadow-sm transition-all duration-200 text-[10px] uppercase tracking-[0.2em] group">
+                    <svg class="w-4 h-4 mr-2 opacity-60 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    PDF
+                </a>
             </div>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100 dark:border-gray-700">
-                <div class="p-0">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700/50">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-saas sm:rounded-2xl border border-gray-100 dark:border-gray-700">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="text-[10px] text-gray-400 uppercase bg-gray-50/50 dark:bg-gray-900/50 font-black tracking-widest border-b border-gray-100 dark:border-gray-700">
                             <tr>
-                                <th class="px-6 py-4">Receipt #</th>
-                                <th class="px-6 py-4">Invoice</th>
-                                <th class="px-6 py-4">Amount</th>
-                                <th class="px-6 py-4">Method</th>
-                                <th class="px-6 py-4">Date</th>
-                                <th class="px-6 py-4">Recorded By</th>
+                                <th class="px-6 py-5">Receipt #</th>
+                                <th class="px-6 py-5">Invoice</th>
+                                <th class="px-6 py-5 text-right">Amount</th>
+                                <th class="px-6 py-5 text-center">Method</th>
+                                <th class="px-6 py-5 text-center">Date</th>
+                                <th class="px-6 py-5 text-right">Recorded By</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                             @foreach($payments as $payment)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
-                                    <td class="px-6 py-4 font-black">
+                                <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-200">
+                                    <td class="px-6 py-4 font-black text-gray-900 dark:text-white">
                                         {{ $payment->payment_number }}
                                     </td>
-                                    <td class="px-6 py-4 text-xs font-bold text-indigo-600 uppercase">
-                                        <a href="{{ route('invoices.show', $payment->invoice) }}">{{ $payment->invoice->invoice_number }}</a>
+                                    <td class="px-6 py-4">
+                                        <a href="{{ route('invoices.show', $payment->invoice) }}" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[11px] font-black uppercase tracking-tighter hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition">
+                                            {{ $payment->invoice->invoice_number }}
+                                        </a>
                                     </td>
-                                    <td class="px-6 py-4 font-black text-emerald-600">
-                                        ${{ number_format($payment->amount, 2) }}
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="font-black text-emerald-600 dark:text-emerald-400">{{ $payment->formatted_amount }}</div>
+                                        @if($payment->currency && !$payment->currency->is_base)
+                                            <div class="text-[10px] text-gray-400 uppercase font-black tracking-tighter opacity-60">≈ {{ $payment->formatted_base_amount }}</div>
+                                        @endif
                                     </td>
-                                    <td class="px-6 py-4 text-xs uppercase font-bold text-gray-500">
-                                        {{ $payment->payment_method }}
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase rounded-md">
+                                            {{ $payment->payment_method }}
+                                        </span>
                                     </td>
-                                    <td class="px-6 py-4 text-xs font-bold text-gray-900 dark:text-white">
+                                    <td class="px-6 py-4 text-center text-[11px] font-bold text-gray-500">
                                         {{ $payment->paid_at }}
                                     </td>
-                                    <td class="px-6 py-4 text-xs text-gray-500 uppercase font-bold">
-                                        {{ $payment->creator->name }}
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <div class="text-xs text-gray-900 dark:text-white font-black uppercase tracking-tight">{{ $payment->creator->name }}</div>
+                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] text-white font-black">
+                                                {{ substr($payment->creator->name, 0, 1) }}
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

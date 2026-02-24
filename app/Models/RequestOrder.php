@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasSequentialNumber;
+use App\Traits\HasMultiCurrency;
 use App\Traits\LogsActivity;
 
 class RequestOrder extends Model
 {
-    use HasSequentialNumber, LogsActivity;
+    use HasSequentialNumber, LogsActivity, HasMultiCurrency;
 
     protected $fillable = [
         'request_number',
@@ -19,7 +20,15 @@ class RequestOrder extends Model
         'created_by',
         'approved_by',
         'approved_at',
+        'currency_id',
+        'exchange_rate',
+        'base_amount',
     ];
+
+    public function getAmountField()
+    {
+        return 'total_amount';
+    }
 
     protected function casts(): array
     {

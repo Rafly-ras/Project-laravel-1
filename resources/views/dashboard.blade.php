@@ -144,7 +144,7 @@
 
                 <div class="bg-white dark:bg-gray-800 rounded-saas p-6 border border-saas-border dark:border-gray-700 relative overflow-hidden shadow-saas">
                     <p class="text-xs font-semibold uppercase text-saas-blue tracking-wider mb-2">Most Profitable Month</p>
-                    <h3 class="text-3xl font-bold text-saas-navy dark:text-white">${{ $bestMonth['month'] }}</h3>
+                    <h3 class="text-3xl font-bold text-saas-navy dark:text-white">{{ $bestMonth['month'] }}</h3>
                     <div class="mt-4 flex items-center text-[10px] text-saas-slate font-semibold uppercase tracking-widest">
                         Peak Performance
                     </div>

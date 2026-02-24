@@ -20,8 +20,8 @@
     <table>
         <thead>
             <tr>
-                <th>PAY #</th>
-                <th>Invoice #</th>
+                <th>PAY </th>
+                <th>Invoice </th>
                 <th>Amount</th>
                 <th>Method</th>
                 <th>Paid At</th>

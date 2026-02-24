@@ -56,8 +56,8 @@
         <thead>
             <tr>
                 <th>Date</th>
-                <th>Receipt #</th>
-                <th>Invoice #</th>
+                <th>Receipt </th>
+                <th>Invoice </th>
                 <th>Customer</th>
                 <th class="text-right">Amount</th>
             </tr>

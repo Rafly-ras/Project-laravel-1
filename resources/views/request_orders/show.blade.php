@@ -54,15 +54,20 @@
                                         <tr>
                                             <td class="py-4 font-bold text-gray-900 dark:text-white">{{ $item->product->name }}</td>
                                             <td class="py-4 text-center font-bold">{{ $item->qty }}</td>
-                                            <td class="py-4 text-right text-gray-500">${{ number_format($item->price, 2) }}</td>
-                                            <td class="py-4 text-right font-black text-gray-900 dark:text-white">${{ number_format($item->subtotal, 2) }}</td>
+                                            <td class="py-4 text-right text-gray-500">{{ $requestOrder->currency->symbol }}{{ number_format($item->price, 2) }}</td>
+                                            <td class="py-4 text-right font-black text-gray-900 dark:text-white">{{ $requestOrder->currency->symbol }}{{ number_format($item->subtotal, 2) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot>
                                     <tr class="border-t-2 border-gray-100 dark:border-gray-700">
                                         <td colspan="3" class="py-6 text-right font-black uppercase text-xs tracking-widest text-gray-500">Total Amount</td>
-                                        <td class="py-6 text-right font-black text-2xl text-indigo-600">${{ number_format($requestOrder->total_amount, 2) }}</td>
+                                        <td class="py-6 text-right">
+                                            <div class="font-black text-2xl text-indigo-600">{{ $requestOrder->formatted_amount }}</div>
+                                            @if(!$requestOrder->currency->is_base)
+                                                <div class="text-xs text-gray-500 font-bold uppercase tracking-widest">≈ {{ $requestOrder->formatted_base_amount }}</div>
+                                            @endif
+                                        </td>
                                     </tr>
                                 </tfoot>
                             </table>

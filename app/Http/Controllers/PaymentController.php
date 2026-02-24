@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\Invoice;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -12,8 +13,9 @@ class PaymentController extends Controller
 {
     public function index()
     {
-        $payments = Payment::with('invoice', 'creator')->latest()->paginate(10);
-        return view('payments.index', compact('payments'));
+        $payments = Payment::with('invoice', 'creator', 'currency')->latest()->paginate(10);
+        $currencies = Currency::where('is_active', true)->get();
+        return view('payments.index', compact('payments', 'currencies'));
     }
 
     public function store(Request $request)
@@ -21,6 +23,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'invoice_id' => 'required|exists:invoices,id',
             'amount' => 'required|numeric|min:0.01',
+            'currency_id' => 'required|exists:currencies,id',
             'payment_method' => 'required|string',
             'reference_number' => 'nullable|string',
             'paid_at' => 'required|date',
@@ -28,24 +31,26 @@ class PaymentController extends Controller
 
         $invoice = Invoice::findOrFail($validated['invoice_id']);
 
-        if (round($validated['amount'], 2) != round($invoice->remaining_balance, 2)) {
-            return back()->with('error', "Payment amount must match the remaining balance exactly (\$ " . number_format($invoice->remaining_balance, 2) . ")");
-        }
-
+        // Check if payment currency matches invoice currency or handle conversion if needed
+        // For now, we assume simple match or validation
+        
         DB::beginTransaction();
         try {
             Payment::create([
                 'invoice_id' => $invoice->id,
                 'amount' => $validated['amount'],
+                'currency_id' => $validated['currency_id'],
                 'payment_method' => $validated['payment_method'],
                 'reference_number' => $validated['reference_number'],
                 'paid_at' => $validated['paid_at'],
                 'created_by' => Auth::id(),
             ]);
 
-            // Update Invoice Status
-            $newPaid = $invoice->paid_amount + $validated['amount'];
-            if ($newPaid >= $invoice->total_amount) {
+            // Update Invoice Status based on base_amount to be accurate across currencies
+            $invoice->refresh(); // getting updated base_amount sum if we use triggers or just manual calc
+            $paidInBase = $invoice->payments()->sum('base_amount');
+            
+            if ($paidInBase >= $invoice->base_amount) {
                 $invoice->update(['status' => 'paid']);
             } else {
                 $invoice->update(['status' => 'partial']);

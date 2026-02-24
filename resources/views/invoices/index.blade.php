@@ -4,42 +4,53 @@
             <h2 class="font-bold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Invoices') }}
             </h2>
-            <div class="flex gap-2">
-                <a href="{{ route('reports.invoices', ['format' => 'excel']) }}" class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-sm transition text-xs uppercase tracking-widest">Excel</a>
-                <a href="{{ route('reports.invoices', ['format' => 'pdf']) }}" class="inline-flex items-center px-4 py-2 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 shadow-sm transition text-xs uppercase tracking-widest">PDF</a>
+            <div class="flex gap-3">
+                <a href="{{ route('reports.invoices', ['format' => 'excel']) }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-emerald-600 dark:text-emerald-400 font-black rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 shadow-sm transition-all duration-200 text-[10px] uppercase tracking-[0.2em] group">
+                    <svg class="w-4 h-4 mr-2 opacity-60 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Excel
+                </a>
+                <a href="{{ route('reports.invoices', ['format' => 'pdf']) }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-rose-600 dark:text-rose-400 font-black rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/20 shadow-sm transition-all duration-200 text-[10px] uppercase tracking-[0.2em] group">
+                    <svg class="w-4 h-4 mr-2 opacity-60 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    PDF
+                </a>
             </div>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100 dark:border-gray-700">
-                <div class="p-0">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700/50">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-saas sm:rounded-2xl border border-gray-100 dark:border-gray-700">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="text-[10px] text-gray-400 uppercase bg-gray-50/50 dark:bg-gray-900/50 font-black tracking-widest border-b border-gray-100 dark:border-gray-700">
                             <tr>
-                                <th class="px-6 py-4">Invoice #</th>
-                                <th class="px-6 py-4">Sales Order</th>
-                                <th class="px-6 py-4">Due Date</th>
-                                <th class="px-6 py-4">Total</th>
-                                <th class="px-6 py-4 text-center">Status</th>
-                                <th class="px-6 py-4 text-right">Actions</th>
+                                <th class="px-6 py-5">Invoice</th>
+                                <th class="px-6 py-5">Sales Order</th>
+                                <th class="px-6 py-5">Due Date</th>
+                                <th class="px-6 py-5 text-right">Total</th>
+                                <th class="px-6 py-5 text-center">Status</th>
+                                <th class="px-6 py-5 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                             @foreach($invoices as $invoice)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                                <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-200">
                                     <td class="px-6 py-4 font-black text-gray-900 dark:text-white">
                                         {{ $invoice->invoice_number }}
                                     </td>
-                                    <td class="px-6 py-4 text-xs font-bold text-indigo-600 uppercase tracking-widest">
-                                        <a href="{{ route('sales-orders.show', $invoice->salesOrder) }}">{{ $invoice->salesOrder->sales_number }}</a>
+                                    <td class="px-6 py-4">
+                                        <a href="{{ route('sales-orders.show', $invoice->salesOrder) }}" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[11px] font-black uppercase tracking-tighter hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition">
+                                            {{ $invoice->salesOrder->sales_number }}
+                                        </a>
                                     </td>
-                                    <td class="px-6 py-4 text-gray-500 font-bold">
+                                    <td class="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase">
                                         {{ $invoice->due_date }}
                                     </td>
-                                    <td class="px-6 py-4 font-black">
-                                        ${{ number_format($invoice->total_amount, 2) }}
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="font-black text-gray-900 dark:text-white">{{ $invoice->formatted_amount }}</div>
+                                        @if($invoice->currency && !$invoice->currency->is_base)
+                                            <div class="text-[10px] text-gray-400 uppercase font-black tracking-tighter opacity-60">≈ {{ $invoice->formatted_base_amount }}</div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         @php
@@ -55,7 +66,9 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <a href="{{ route('invoices.show', $invoice) }}" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs uppercase tracking-wider">View</a>
+                                        <a href="{{ route('invoices.show', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-black rounded-xl hover:bg-indigo-600 hover:text-white transition-all duration-200 text-[10px] uppercase tracking-widest">
+                                            View
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach

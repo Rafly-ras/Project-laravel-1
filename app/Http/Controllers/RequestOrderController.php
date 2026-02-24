@@ -7,6 +7,7 @@ use App\Models\RequestOrderItem;
 use App\Models\Product;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderItem;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,7 @@ class RequestOrderController extends Controller
 {
     public function index()
     {
-        $requestOrders = RequestOrder::with('creator', 'approver')
+        $requestOrders = RequestOrder::with('creator', 'approver', 'currency')
             ->latest()
             ->paginate(10);
         return view('request_orders.index', compact('requestOrders'));
@@ -24,7 +25,8 @@ class RequestOrderController extends Controller
     public function create()
     {
         $products = Product::where('stock', '>', 0)->get();
-        return view('request_orders.create', compact('products'));
+        $currencies = Currency::where('is_active', true)->get();
+        return view('request_orders.create', compact('products', 'currencies'));
     }
 
     public function store(Request $request)
@@ -32,6 +34,7 @@ class RequestOrderController extends Controller
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'nullable|email|max:255',
+            'currency_id' => 'required|exists:currencies,id',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.qty' => 'required|integer|min:1',
@@ -58,6 +61,7 @@ class RequestOrderController extends Controller
             $requestOrder = RequestOrder::create([
                 'customer_name' => $validated['customer_name'],
                 'customer_email' => $validated['customer_email'],
+                'currency_id' => $validated['currency_id'],
                 'total_amount' => $totalAmount,
                 'created_by' => Auth::id(),
                 'status' => 'draft',
@@ -120,6 +124,8 @@ class RequestOrderController extends Controller
             $salesOrder = SalesOrder::create([
                 'request_order_id' => $requestOrder->id,
                 'customer_name' => $requestOrder->customer_name,
+                'currency_id' => $requestOrder->currency_id,
+                'exchange_rate' => $requestOrder->exchange_rate,
                 'total_amount' => $requestOrder->total_amount,
                 'created_by' => Auth::id(),
                 'status' => 'draft',
