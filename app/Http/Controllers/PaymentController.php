@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
+    protected $postingEngine;
+
+    public function __construct(\App\Services\PostingEngine $postingEngine)
+    {
+        $this->postingEngine = $postingEngine;
+    }
+
     public function index()
     {
         $payments = Payment::with('invoice', 'creator', 'currency')->latest()->paginate(10);
@@ -45,6 +52,9 @@ class PaymentController extends Controller
                 'paid_at' => $validated['paid_at'],
                 'created_by' => Auth::id(),
             ]);
+
+            // Post to Accounting
+            $this->postingEngine->postPayment($payment);
 
             // Update Invoice Status based on base_amount to be accurate across currencies
             $invoice->refresh(); // getting updated base_amount sum if we use triggers or just manual calc
