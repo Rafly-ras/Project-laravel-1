@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\Auth;
 
 class SalesOrderController extends Controller
 {
+    protected $postingEngine;
+
+    public function __construct(\App\Services\PostingEngine $postingEngine)
+    {
+        $this->postingEngine = $postingEngine;
+    }
+
     public function index()
     {
         $salesOrders = SalesOrder::with('creator', 'requestOrder')
@@ -82,6 +89,9 @@ class SalesOrderController extends Controller
                 'gross_profit' => $totalGrossProfit,
                 'margin_percentage' => $marginPercentage,
             ]);
+
+            // Post to Accounting
+            $this->postingEngine->postSalesOrder($salesOrder);
 
             DB::commit();
             return back()->with('success', 'Sales Order confirmed and stock updated.');
