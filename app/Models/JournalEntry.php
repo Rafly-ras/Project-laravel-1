@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class JournalEntry extends Model
 {
-    use LogsActivity;
+    use LogsActivity, \App\Traits\ImmutableLedger;
 
     protected $fillable = [
         'entry_date',
@@ -16,11 +16,18 @@ class JournalEntry extends Model
         'currency_id',
         'exchange_rate',
         'accounting_period_id',
-        'created_by'
+        'created_by',
+        'hash',
+        'previous_hash',
+        'reversed_at',
+        'reversing_entry_id',
+        'is_reversal'
     ];
 
     protected $casts = [
         'entry_date' => 'date',
+        'reversed_at' => 'datetime',
+        'is_reversal' => 'boolean',
     ];
 
     public function lines()

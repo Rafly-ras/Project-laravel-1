@@ -22,4 +22,9 @@ class Account extends Model
     {
         return $this->hasMany(JournalEntryLine::class);
     }
+
+    public function snapshots()
+    {
+        return $this->hasMany(AccountSnapshot::class);
+    }
 }

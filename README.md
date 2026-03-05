@@ -21,11 +21,14 @@ A comprehensive Enterprise Resource Planning (ERP) and Inventory Management syst
 - **Automated Invoicing**: Professional invoice tracking with due date monitoring and automated balance updates.
 - **Payment Processing**: Integrated payment tracking with support for multiple payment methods and partial payments.
 
-### 💸 Finance & Reporting
-- **Expense Management**: Tracking of business expenses with customizable category classification.
-- **Multi-Currency Capability**: Support for foreign currencies with automated base currency conversions and historical exchange rate tracking.
-- **Profit Reports**: Comprehensive breakdown of Revenue, Cost of Goods Sold (COGS), and Gross/Net margins.
-- **Cash Flow Reports**: Detailed analysis of business inflows and outflows over time.
+### 🏦 Enterprise Accounting Engine
+- **Double-Entry Core**: Full compliance with standard accounting principles using a hierarchical Chart of Accounts (CoA).
+- **🛡️ Immutable Ledger**: Cryptographic sequential SHA-256 hash chaining ensuring every journal entry is tamper-proof and traceable.
+- **Zero-Edit Policy**: Strict enforcement of immutability where corrections are handled via **Automated Reversals** to maintain a perfect audit trail.
+- **📈 Accrual & Deferral Engine**: Automated scheduling and posting for deferred revenue and prepaid expenses over time (e.g., monthly service recognition).
+- **⚡ CQRS-lite Optimization**: High-performance reporting using **Account Snapshots**, enabling O(1) balance lookups for historical data.
+- **Multi-Currency Clarity**: Real-time conversion and pinning of exchange rates at the transaction level to prevent financial "penny-drift."
+- **Integrated Reporting**: Sub-second generation of Trial Balance, Balance Sheet, and Profit & Loss statements.
 
 ### 🛡️ Security & Administration
 - **RBAC (Role-Based Access Control)**: Fine-grained permission system controlling access to every module and action.
