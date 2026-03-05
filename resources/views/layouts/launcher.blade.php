@@ -67,7 +67,7 @@
         </main>
 
         <footer class="py-6 text-center text-xs text-gray-400">
-            &copy; {{ date('Y') }} Enterprise ERP System. All rights reserved.
+            &copy; {{ date('Y') }} Enterprise ERP System by Rafly. All rights reserved.
         </footer>
 
         @stack('scripts')
