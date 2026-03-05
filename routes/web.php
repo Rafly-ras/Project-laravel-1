@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
@@ -20,7 +21,11 @@ use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\CashFlowReportController;
 use App\Http\Controllers\ProfitReportController;
 
-Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
+Route::get('/', function () {
+    return redirect()->route('home');
+})->middleware(['auth']);
+
+Route::get('/home', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
 
 /*
 |--------------------------------------------------------------------------
@@ -50,7 +55,7 @@ Route::middleware('auth')->group(function () {
         Route::get('products/export/csv', [ProductController::class, 'exportStockCsv'])->name('products.export.csv')->middleware('can:products.stock-summary');
         Route::get('products/export/pdf', [ProductController::class, 'exportStockPdf'])->name('products.export.pdf')->middleware('can:products.stock-summary');
         Route::resource('products', ProductController::class);
-        Route::resource('categories', CategoryController::class);
+        Route::resource('categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('warehouses', WarehouseController::class)->except(['show', 'destroy']);
     });
 

@@ -36,4 +36,12 @@
     nav .nav-inner-row {
         overflow: hidden;
     }
+
+    .glass {
+        @apply bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg border border-white/20 dark:border-gray-700/30;
+    }
+
+    .animate-in {
+        animation-delay: calc(var(--index) * 50ms);
+    }
 }

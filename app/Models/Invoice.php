@@ -53,12 +53,25 @@ class Invoice extends Model
 
     public function getPaidAmountAttribute()
     {
-        return $this->payments()->sum('amount');
+        // Sum base_amount from payments and convert back to invoice currency
+        // for consistent display tracking.
+        $totalBasePaid = $this->payments()->sum('base_amount');
+        return $this->exchange_rate > 0 ? $totalBasePaid / $this->exchange_rate : 0;
     }
 
     public function getRemainingBalanceAttribute()
     {
         return $this->total_amount - $this->paid_amount;
+    }
+
+    public function getBasePaidAmountAttribute()
+    {
+        return $this->payments()->sum('base_amount');
+    }
+
+    public function getBaseRemainingBalanceAttribute()
+    {
+        return $this->base_amount - $this->base_paid_amount;
     }
 
     public function recognitionSchedule()
