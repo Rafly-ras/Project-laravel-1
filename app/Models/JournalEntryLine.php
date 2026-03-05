@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class JournalEntryLine extends Model
 {
+    use \App\Traits\ImmutableLedger;
+
     protected $fillable = [
         'journal_entry_id',
         'account_id',

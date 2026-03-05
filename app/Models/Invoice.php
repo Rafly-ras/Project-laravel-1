@@ -21,6 +21,8 @@ class Invoice extends Model
         'currency_id',
         'exchange_rate',
         'base_amount',
+        'is_deferred',
+        'recognition_periods',
     ];
 
     public function getAmountField()
@@ -57,5 +59,10 @@ class Invoice extends Model
     public function getRemainingBalanceAttribute()
     {
         return $this->total_amount - $this->paid_amount;
+    }
+
+    public function recognitionSchedule()
+    {
+        return $this->morphOne(RecognitionSchedule::class, 'source');
     }
 }

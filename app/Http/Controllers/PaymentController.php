@@ -43,7 +43,11 @@ class PaymentController extends Controller
         
         DB::beginTransaction();
         try {
-            Payment::create([
+            // Pin exchange rate to invoice to ensure base_amount parity for status checks
+            $exchangeRate = $invoice->exchange_rate;
+            $baseAmount = $validated['amount'] * $exchangeRate;
+
+            $payment = Payment::create([
                 'invoice_id' => $invoice->id,
                 'amount' => $validated['amount'],
                 'currency_id' => $validated['currency_id'],
@@ -51,16 +55,18 @@ class PaymentController extends Controller
                 'reference_number' => $validated['reference_number'],
                 'paid_at' => $validated['paid_at'],
                 'created_by' => Auth::id(),
+                'exchange_rate' => $exchangeRate,
+                'base_amount' => $baseAmount,
             ]);
 
             // Post to Accounting
             $this->postingEngine->postPayment($payment);
 
-            // Update Invoice Status based on base_amount to be accurate across currencies
-            $invoice->refresh(); // getting updated base_amount sum if we use triggers or just manual calc
+            // Update Invoice Status based on base_amount
+            $invoice->refresh(); 
             $paidInBase = $invoice->payments()->sum('base_amount');
             
-            if ($paidInBase >= $invoice->base_amount) {
+            if ($paidInBase >= ($invoice->base_amount - 0.01)) { // Allow for tiny rounding diffs
                 $invoice->update(['status' => 'paid']);
             } else {
                 $invoice->update(['status' => 'partial']);

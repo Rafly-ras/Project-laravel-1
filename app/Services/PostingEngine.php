@@ -12,10 +12,12 @@ use Exception;
 class PostingEngine
 {
     protected $accountingService;
+    protected $recognitionService;
 
-    public function __construct(AccountingService $accountingService)
+    public function __construct(AccountingService $accountingService, RecognitionService $recognitionService)
     {
         $this->accountingService = $accountingService;
+        $this->recognitionService = $recognitionService;
     }
 
     /**
@@ -64,10 +66,13 @@ class PostingEngine
     public function postInvoice(Invoice $invoice)
     {
         $arAccount = Account::where('code', '1200')->first(); // Accounts Receivable
-        $salesAccount = Account::where('code', '4100')->first(); // Sales Revenue
+        
+        // If deferred, hit Deferred Revenue (2200), otherwise hit Sales Revenue (4100)
+        $revenueCode = $invoice->is_deferred ? '2200' : '4100';
+        $revenueAccount = Account::where('code', $revenueCode)->first();
 
-        if (!$arAccount || !$salesAccount) {
-            throw new Exception("Accounting accounts (1200 or 4100) not found. Check CoA seeder.");
+        if (!$arAccount || !$revenueAccount) {
+            throw new Exception("Accounting accounts (1200 or {$revenueCode}) not found.");
         }
 
         $lines = [
@@ -80,8 +85,8 @@ class PostingEngine
                 'base_credit' => 0,
             ],
             [
-                'account_id' => $salesAccount->id,
-                'description' => "Sales Revenue for Invoice " . $invoice->invoice_number,
+                'account_id' => $revenueAccount->id,
+                'description' => ($invoice->is_deferred ? "Deferred Revenue" : "Sales Revenue") . " for Invoice " . $invoice->invoice_number,
                 'debit' => 0,
                 'credit' => $invoice->total_amount,
                 'base_debit' => 0,
@@ -89,13 +94,20 @@ class PostingEngine
             ],
         ];
 
-        return $this->accountingService->createJournalEntry([
+        $entry = $this->accountingService->createJournalEntry([
             'entry_date' => $invoice->issued_at ?? now(),
             'reference' => $invoice->invoice_number,
             'description' => "Automated entry for Invoice " . $invoice->invoice_number,
             'currency_id' => $invoice->currency_id,
             'exchange_rate' => $invoice->exchange_rate,
         ], $lines);
+
+        // If deferred, create the recognition schedule
+        if ($invoice->is_deferred && $invoice->recognition_periods > 0) {
+            $this->recognitionService->createScheduleFromInvoice($invoice, $invoice->recognition_periods);
+        }
+
+        return $entry;
     }
 
     /**
