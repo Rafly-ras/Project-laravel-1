@@ -14,6 +14,14 @@ class HomeController extends Controller
     {
         $modules = [
             [
+                'name' => 'Dashboard',
+                'description' => 'Real-time stats and overviews',
+                'icon' => 'dashboard',
+                'route' => 'dashboard',
+                'permission' => 'reports.view',
+                'color' => 'bg-emerald-600',
+            ],
+            [
                 'name' => 'Inventory',
                 'description' => 'Stock, Products, Warehouses',
                 'icon' => 'cube',
@@ -42,7 +50,7 @@ class HomeController extends Controller
                 'description' => 'Expense tracking, Categories',
                 'icon' => 'credit-card',
                 'route' => 'expenses.index',
-                'permission' => 'reports.view', // Use reports.view for finance overview access
+                'permission' => 'reports.view', 
                 'color' => 'bg-red-500',
             ],
             [
