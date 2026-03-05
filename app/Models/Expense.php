@@ -19,6 +19,7 @@ class Expense extends Model
         'currency_id',
         'exchange_rate',
         'base_amount',
+        'department_id',
     ];
 
     protected $casts = [
