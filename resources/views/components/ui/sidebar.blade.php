@@ -2,6 +2,7 @@
     $segment = Request::segment(1);
     
     // Module detection logic
+    $isDashboard = $segment === 'dashboard';
     $isInventory = in_array($segment, ['products', 'warehouses', 'categories', 'transactions']);
     $isSales = in_array($segment, ['sales-orders', 'request-orders']);
     $isAccounting = in_array($segment, ['invoices', 'payments']);
@@ -9,11 +10,9 @@
     $isReports = $segment === 'reports';
     $isManagement = in_array($segment, ['employees', 'roles', 'profile']);
     
-    // Default to Dashboard if no specific module segment matches
-    if (!$isInventory && !$isSales && !$isAccounting && !$isFinance && !$isReports && !$isManagement) {
-        $isInventory = true; // Fallback or show all for Dashboard? 
-        // User said: "Inventory clicked -> show inventory. Sales clicked -> show sales."
-        // We'll show the module the user is currently in.
+    // Fallback: Default to Dashboard if no specific module matches
+    if (!$isDashboard && !$isInventory && !$isSales && !$isAccounting && !$isFinance && !$isReports && !$isManagement) {
+        $isDashboard = true; 
     }
 @endphp
 
@@ -49,16 +48,18 @@
     <!-- Navigation Area -->
     <div class="flex-1 overflow-y-auto overflow-x-hidden py-6 px-3 space-y-8 scrollbar-hide">
         
-        <!-- Dashboard (Persistent if we want, or contextual) -->
+        <!-- Dashboard Module -->
+        @if($isDashboard)
         <div>
             <div class="px-3 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-opacity duration-300"
                  :class="sidebarCollapsed ? 'opacity-0' : 'opacity-100'">
-                General
+                Dashboard Overview
             </div>
             <div class="space-y-1">
                 <x-ui.sidebar-item :href="route('dashboard')" label="Dashboard" icon="dashboard" :active="request()->routeIs('dashboard')" />
             </div>
         </div>
+        @endif
 
         <!-- Inventory Module -->
         @if($isInventory)
