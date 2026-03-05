@@ -20,6 +20,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\CashFlowReportController;
 use App\Http\Controllers\ProfitReportController;
+use App\Http\Controllers\BankReconciliationController;
 
 Route::get('/', function () {
     return redirect()->route('home');
@@ -117,6 +118,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/chart-data', [DashboardController::class, 'getChartData'])->name('api.chart-data');
 
     Route::resource('posts', PostController::class)->except(['show']);
+
+    // ─── Bank Reconciliation Module ────────────────────────────────────────
+    Route::middleware('can:bank.reconcile')->prefix('bank-reconciliation')->group(function () {
+        Route::get('/', [BankReconciliationController::class, 'index'])->name('bank-recon.index');
+        Route::post('/import', [BankReconciliationController::class, 'import'])->name('bank-recon.import');
+        Route::get('/{bankStatement}', [BankReconciliationController::class, 'show'])->name('bank-recon.show');
+        Route::post('/confirm-match', [BankReconciliationController::class, 'confirmMatch'])->name('bank-recon.confirm');
+    });
+
+    // ─── Operational Layer – Budgets & Departments ─────────────────────────
+    Route::middleware('can:budgets.manage')->prefix('operations')->group(function () {
+        Route::resource('departments', App\Http\Controllers\DepartmentController::class);
+        Route::resource('budgets', App\Http\Controllers\BudgetController::class);
+        Route::resource('customers', App\Http\Controllers\CustomerController::class);
+        Route::resource('approval-matrices', App\Http\Controllers\ApprovalMatrixController::class);
+    });
 });
 
 

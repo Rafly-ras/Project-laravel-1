@@ -13,11 +13,16 @@ class PostingEngine
 {
     protected $accountingService;
     protected $recognitionService;
+    protected $budgetService;
 
-    public function __construct(AccountingService $accountingService, RecognitionService $recognitionService)
-    {
+    public function __construct(
+        AccountingService $accountingService, 
+        RecognitionService $recognitionService,
+        BudgetControlService $budgetService
+    ) {
         $this->accountingService = $accountingService;
         $this->recognitionService = $recognitionService;
+        $this->budgetService = $budgetService;
     }
 
     /**
@@ -162,6 +167,15 @@ class PostingEngine
             throw new Exception("Accounting accounts (5200 or 1100) not found.");
         }
 
+        // Budget Check
+        if ($expense->department_id) {
+            $this->budgetService->checkBudget(
+                $expense->base_amount, 
+                $expenseAccount->id, 
+                $expense->department_id
+            );
+        }
+
         $lines = [
             [
                 'account_id' => $expenseAccount->id,
@@ -181,12 +195,23 @@ class PostingEngine
             ],
         ];
 
-        return $this->accountingService->createJournalEntry([
+        $entry = $this->accountingService->createJournalEntry([
             'entry_date' => $expense->expense_date,
             'reference' => "EXP-" . $expense->id,
             'description' => "Automated entry for Expense: " . $expense->description,
             'currency_id' => $expense->currency_id,
             'exchange_rate' => $expense->exchange_rate,
         ], $lines);
+
+        // Budget Increment
+        if ($expense->department_id) {
+            $this->budgetService->incrementSpent(
+                $expense->base_amount, 
+                $expenseAccount->id, 
+                $expense->department_id
+            );
+        }
+
+        return $entry;
     }
 }
