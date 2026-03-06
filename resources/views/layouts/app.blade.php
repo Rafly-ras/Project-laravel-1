@@ -63,7 +63,7 @@
                 </main>
                 
                 <footer class="h-10 flex items-center justify-center text-[10px] text-gray-400 border-t border-gray-100 dark:border-gray-800 shrink-0">
-                    &copy; {{ date('Y') }} Enterprise ERP Platform. Powered by Laravel 12.
+                    &copy; {{ date('Y') }} Enterprise ERP Platform by Rafly. Powered by Laravel 12.
                 </footer>
             </div>
         </div>
